@@ -1,0 +1,113 @@
+{
+	"_version": "0.0.1",
+	"sap.app":{
+		"_version": "0.0.1",
+		"id": "be.fiddle.BusinessObjectModel",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "0.0.1"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"dataSources": {
+			"contacts": {
+				"uri": "/services/contacts.php",
+				"type": "JSON",
+				"settings": {
+					"annotations": []
+				}
+			}
+		}
+	},
+	"sap.ui": {
+		"_version": "1.1.0",
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": ["sap_bluecrystal", "sap_belize_plus"]
+	},
+	"sap.ui5": {
+		"_version": "1.1.0",
+		"rootView": {
+			"viewName": "be.fiddle.BusinessObjectModel.view.Home",
+			"type": "XML",
+			"id":"Home"
+		},
+		"dependencies": {
+			"minUI5Version": "1.30.0",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.ui.layout": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "be.fiddle.BusinessObjectModel.i18n.i18n"
+				}
+			},
+			"contacts": {
+				"type": "be.fiddle.BusinessObjectModel.model.BusinessObjectModel",
+				"dataSource": "contacts",
+				"settings": {
+                    "ObjectClass":"be.fiddle.BusinessObjectModel.model.businessobject.Contact",
+					"metadataUrlParams": {
+						"sap-documentation": "heading"
+					}
+				}
+			}
+		},
+		"resources": {
+			"css": [{	"uri": "css/style.css"	},
+					{	"uri":"css/meeting.css" } ]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"viewPath": "be.fiddle.BusinessObjectModel.view",
+				"controlId": "fiddleMain",
+				"controlAggregation": "pages",
+				"transition": "fade",
+				"bypassed": {
+					"target": ["Notfound"]
+				}
+			},
+			"targets": {
+				"Home": {
+					"viewName": "Home",
+					"viewId": "Home"
+				}
+			},
+			"routes": [{
+				"name": "None",
+				"pattern": "",
+				"greedy": false,
+				"target": ["Home"]
+			}, {
+				"name": "Notfound",
+				"pattern": ":all*:",
+				"greedy": false,
+				"target": ["Notfound"]
+			}]
+		}
+	}
+}
