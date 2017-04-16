@@ -41,7 +41,7 @@
 	"sap.ui5": {
 		"_version": "1.1.0",
 		"rootView": {
-			"viewName": "be.fiddle.BusinessObjectModel.view.Home",
+			"viewName": "be.fiddle.BusinessObjectModel.view.Contact",
 			"type": "XML",
 			"id":"Home"
 		},
@@ -76,38 +76,7 @@
 			}
 		},
 		"resources": {
-			"css": [{	"uri": "css/style.css"	},
-					{	"uri":"css/meeting.css" } ]
-		},
-		"routing": {
-			"config": {
-				"routerClass": "sap.m.routing.Router",
-				"viewType": "XML",
-				"viewPath": "be.fiddle.BusinessObjectModel.view",
-				"controlId": "fiddleMain",
-				"controlAggregation": "pages",
-				"transition": "fade",
-				"bypassed": {
-					"target": ["Notfound"]
-				}
-			},
-			"targets": {
-				"Home": {
-					"viewName": "Home",
-					"viewId": "Home"
-				}
-			},
-			"routes": [{
-				"name": "None",
-				"pattern": "",
-				"greedy": false,
-				"target": ["Home"]
-			}, {
-				"name": "Notfound",
-				"pattern": ":all*:",
-				"greedy": false,
-				"target": ["Notfound"]
-			}]
+			"css": []
 		}
 	}
 }

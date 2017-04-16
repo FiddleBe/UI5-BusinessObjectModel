@@ -1,8 +1,6 @@
 sap.ui.define([
-	"sap/ui/core/UIComponent",
-	"sap/ui/Device",
-	"be/fiddle/BusinessObjectModel/model/models"
-], function(UIComponent, Device, models) {
+	"sap/ui/core/UIComponent"
+], function(UIComponent) {
 	"use strict";
 
 	var Component = UIComponent.extend("be.fiddle.BusinessObjectModel.Component", {		
@@ -17,7 +15,6 @@ sap.ui.define([
 
 	Component.prototype.init = function() {
 			UIComponent.prototype.init.apply(this, arguments);
-			this.getRouter().initialize();
 	};
 
     return Component;
