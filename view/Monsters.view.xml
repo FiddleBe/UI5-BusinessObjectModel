@@ -1,4 +1,4 @@
-<mvc:View	controllerName="be.fiddle.BusinessObjectModel.controller.Contact" 
+<mvc:View	controllerName="be.fiddle.BusinessObjectModel.controller.Monsters" 
 			xmlns:html="http://www.w3.org/1999/xhtml" 
 			xmlns:mvc="sap.ui.core.mvc" 
 			xmlns="sap.m">

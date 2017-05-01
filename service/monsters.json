@@ -1,0 +1,41 @@
+{
+	"entries":[
+		{
+			"id":"1",
+			"timestamp":"1493613748000",
+			"changeIndicator":"I",
+			"changeRecords":{
+				"type":"Dragon",
+				"name":"Smaug"
+			}
+		},
+		{
+			"id":"1",
+			"timestamp":"1493633745000",
+			"changeIndicator":"U",
+			"changeRecords":{
+				"gold":"50 Bazillion",
+				"dwarvesEaten":"10000"
+			}
+		},
+		{
+			"id":"2",
+			"timestamp":"1493632740030",
+			"changeIndicator":"I",
+			"changeRecords":{
+				"type":"Dragon",
+				"name":"Pete",
+				"specialAbility":"invisibility"
+			}
+		},
+		{
+			"id":"3",
+			"timestamp":"1493633740000",
+			"changeIndicator":"I",
+			"changeRecords":{
+				"type":"Vampire",
+				"name":"Dracula"
+			}
+		}
+	]
+}

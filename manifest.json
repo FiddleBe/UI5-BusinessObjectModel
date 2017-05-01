@@ -12,13 +12,14 @@
 		"description": "{{appDescription}}",
 		"dataSources": {
 			"contacts": {
-				"uri": "/services/contacts.php",
+				"uri": "/service/monsters.php",
 				"type": "JSON",
 				"settings": {
 					"annotations": []
 				}
 			}
-		}
+		},
+		"offline":true
 	},
 	"sap.ui": {
 		"_version": "1.1.0",
@@ -41,7 +42,7 @@
 	"sap.ui5": {
 		"_version": "1.1.0",
 		"rootView": {
-			"viewName": "be.fiddle.BusinessObjectModel.view.Contact",
+			"viewName": "be.fiddle.BusinessObjectModel.view.Monsters",
 			"type": "XML",
 			"id":"Home"
 		},
@@ -68,7 +69,8 @@
 				"type": "be.fiddle.BusinessObjectModel.model.BusinessObjectModel",
 				"dataSource": "contacts",
 				"settings": {
-                    "ObjectClass":"be.fiddle.BusinessObjectModel.model.businessobject.Contact",
+					"testData": "/service/monsters.json",
+                    "ObjectClass":"be.fiddle.BusinessObjectModel.model.businessobject.Monster",
 					"metadataUrlParams": {
 						"sap-documentation": "heading"
 					}

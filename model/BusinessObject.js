@@ -16,7 +16,7 @@
  * {id:1, name:"Tom", age:"30", work:"developer", ... }
 **/
 sap.ui.define([
-        "sap/ui/base/EventProvider"
+        "sap/ui/base/ManagedObject" //test the managedObject instead of EventProvider
 ],
     function (BaseObject) {
         "use strict";
@@ -45,13 +45,20 @@ sap.ui.define([
                 }
             }
         });
+        
+        BusObj.prototype.isThisYou = function(oObject){
+        	if( oObject.id === this.id ){
+        		return true;
+        	}
+        	else return false;
+        };
 
         BusObj.prototype.getJSON = function () {
             var oJSON = {};
 
             for (key in this) {
                 if (typeof this[key] !== "function" 		//do not include methods
-                	&& BaseObject.prototype[key] === undefined  //but also don't include the properties of the inherited object.
+                	&& BaseObject.prototype[key] === undefined  //don't include the properties of the superior object.
                 ) {
                     oJSON[key] = this[key];
                 }
@@ -219,9 +226,13 @@ sap.ui.define([
         BusObj.ClassConstructor = function () {
 
         };
+        
+        BusObj.getObject = function(oData){
+        	return new BusObj(oData);
+        };//factory to get the right child object
 
         //statically call the class constructor
-        BusObj.ClassConstructor();
+        setTimeout( BusObj.ClassConstructor, 1); //to prevent the constructor from running before the BusinessObject is defined
 
         return BusObj;
     }

@@ -25,6 +25,7 @@ sap.ui.define([
             constructor: function (sUrl, oSettings) {
                 //instance constructor
                 this.sUrl = sUrl || (oSettings && oSettings.url );	//remember this for sync operations
+                this.sTestData = oSettings && oSettings.testData;
                 this.oSettings = oSettings; //keep the settings, since you'll need them for synchronization afterwards
 
                 //by default, use the standard JSON model if there is no db defined, it's an online only model
@@ -61,7 +62,7 @@ sap.ui.define([
             } 
         });
 
-        ObjectModel.prototype.getObject = function ( sPath) { 
+        ObjectModel.prototype.getObject = function ( sPath, oCtx, oParams) { 
             var oData = Model.prototype.getObject.apply(this, arguments);
 			
 			if( oData instanceof BusinessObject ){ //if the object retrieved from the model is already an instance
@@ -73,7 +74,7 @@ sap.ui.define([
                 //in theory, if you update th contents of the data-object, they will also update in the model and trigger changes
                 //that's because the oData variable is a pointer to the model data entry.
                 //but that's the theory. I wonder how it will work in practice
-                var oObject = new this.objectClass(oData);
+                var oObject = this.objectClass.getObject(oData);
 	            oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
                 return oObject;
             }
@@ -82,6 +83,24 @@ sap.ui.define([
                 return oData;
             }
         };//The context.getObject returns an instance of the template class, with the data loaded
+        
+        ObjectModel.prototype.setObject = function( sPath, oObject ){
+        	if(sPath){
+        		this.setProperty(sPath, oObject);
+        		return true;
+        	}
+        	else{
+        		var i = this.entries.length;
+        		while(i--){
+        			oTemp = this.entries[i];
+        			if(oTemp instanceof BusinessObject && oTemp.isThisYou(oObject) ){
+        				this.entries[i] = oObject;
+        				return true;
+        			}
+        		}
+        	}
+      		return false;
+        };
         
         ObjectModel.prototype.create = function( sPath ){
         	var oObject = new this.objectClass({id:jQuery.sap.uid()});
@@ -151,8 +170,25 @@ sap.ui.define([
 			if(!sURL ){
 				sURL = this.sUrl;
 			}
+			
+			//Y U NO TRIGGER!!!!!
+            if(this.sTestData && sURL !== this.sTestData){
+            	this.attachRequestFailed( {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
+            							this.loadTestData, 
+            							this );
+				this.attachParseError(  {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
+            							this.loadTestData, 
+            							this );
+            }
+
             Model.prototype.loadData.call(this,sURL, oParameters, bAsync, sType, bMerge, bCache, mHeaders); //trigger the superior model implementation
         };//redefine setData, make it so that it convers every entry into an object before adding into the collection
+        
+        this.loadTestData = function(oData){
+			this.detachRequestFailed(this.loadTestData, this);
+			this.detachParseError(this.loadTestData, this);
+			this.loadData(this.sTestData, oData.oParameters, oData.bAsync, oData.sType, oData.bMerge, oData.bCache, oData.mHeaders);
+        };//backup for test data
         
         ObjectModel.prototype.setData = function (oData, bMerge) {
             var aData = [];
@@ -170,7 +206,7 @@ sap.ui.define([
             	for(var j = 0 ; j < this.oData.entries.length; j++){
             		var oEntry = this.oData.entries[j];
             		
-            		if(oEntry.id === aData[i].id){
+            		if(oEntry.isThisYou( aData[i] ) ){
             			//we have a match: add the change documents to the change document collection
             			oEntry.addChangeRecords(aData[i].changeRecords);
             			bMerged = true;
@@ -178,7 +214,7 @@ sap.ui.define([
             		}
             	}
             	if(!bMerged && this.objectClass && ! (aData[i] instanceof this.objectClass) ){
-	                var oObject = new this.objectClass(aData[i]);
+	                var oObject = this.objectClass.getObject(aData[i]);
 	                this.oData.entries.push(oObject);
 	                bMerged = true;
             	}else if(!bMerged ){
