@@ -65,7 +65,7 @@
 					"bundleName": "be.fiddle.BusinessObjectModel.i18n.i18n"
 				}
 			},
-			"contacts": {
+			"monsters": {
 				"type": "be.fiddle.BusinessObjectModel.model.BusinessObjectModel",
 				"dataSource": "contacts",
 				"settings": {

@@ -4,11 +4,25 @@
 			xmlns="sap.m">
 	<Page title="{i18n>home}" id="pageContact"  showHeader="false" >
 		<content>
-			<NavContainer id="BusinessObjectModelMain">
-				<pages>
-<!-- views loaded lazily and dynamically, when they are needed-->
-				</pages>
-			</NavContainer>
+			<table items="{monsters>/entries}">
+				<columns>
+					<Column width="12em"><Text text="Id" /></Column>
+					<Column><Text text="Type" /></Column>
+					<Column><Text text="Changes" /></Column>
+				</columns>
+
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ObjectIdentifier 	title="{monsters>name}"
+												text="{monsters>id}"/>
+							<Text text="{monsters>type}" />
+							<ObjectNumber	number="{= ${monsters>changeRecords}.length }"
+											unit="changes" />
+						</cells>
+					</ColumnListItem>
+				</items>				
+			</table>
 		</content>
 	</Page>
 </mvc:View>
