@@ -17,5 +17,5 @@ sap.ui.define([
 		
 	};
 
-	return Contact;
+	return Monster;
 });
