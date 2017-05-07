@@ -22,6 +22,13 @@ sap.ui.define([
  **/
         /*---------------------------------------instance ------------------------------------------------------*/
         var ObjectModel = Model.extend("be.fiddle.BusinessObjectModel.model.BusinessObjectModel", {
+        	/*
+        	oSettings:{
+        		ObjectClass:"path.to.businessobject.class"
+        		db:"databasename"
+        		store:"tablename. typically your entity name"
+        	}
+        	*/
             constructor: function (sUrl, oSettings) {
                 //instance constructor
                 this.sUrl = sUrl || (oSettings && oSettings.url );	//remember this for sync operations
@@ -32,7 +39,8 @@ sap.ui.define([
                 if(oSettings && oSettings.db){
 	                //if there is DB information in your settings object, make sure you bind this model to that DB
                 	Model.prototype.constructor.apply(this, {} ); //pass an empty object to the jsonmodel, since the data will come from the DB
-	                this.getDataFromDb(oSettings);
+	                this.getDataFromDb(oSettings)		//get data from db
+	                .then( this.setData.bind(this) );	//and move it into the object model
                 }else{
                 	Model.prototype.constructor.apply(this, arguments ); //there is no DB: online only: get data from service url
                 }
@@ -171,7 +179,7 @@ sap.ui.define([
 				sURL = this.sUrl;
 			}
 			
-			//Y U NO TRIGGER!!!!!
+			//fallback to test data
             if(this.sTestData && sURL !== this.sTestData){
             	this.attachRequestFailed( {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
             							this.loadTestData, 
@@ -184,7 +192,7 @@ sap.ui.define([
             Model.prototype.loadData.call(this,sURL, oParameters, bAsync, sType, bMerge, bCache, mHeaders); //trigger the superior model implementation
         };//redefine setData, make it so that it convers every entry into an object before adding into the collection
         
-        this.loadTestData = function(oData){
+        ObjectModel.prototype.loadTestData = function(oData){
 			this.detachRequestFailed(this.loadTestData, this);
 			this.detachParseError(this.loadTestData, this);
 			this.loadData(this.sTestData, oData.oParameters, oData.bAsync, oData.sType, oData.bMerge, oData.bCache, oData.mHeaders);
@@ -206,7 +214,7 @@ sap.ui.define([
             	for(var j = 0 ; j < this.oData.entries.length; j++){
             		var oEntry = this.oData.entries[j];
             		
-            		if(oEntry.isThisYou( aData[i] ) ){
+            		if(oEntry instanceof BusinessObject && oEntry.isThisYou( aData[i] ) ){
             			//we have a match: add the change documents to the change document collection
             			oEntry.addChangeRecords(aData[i].changeRecords);
             			bMerged = true;
@@ -228,10 +236,104 @@ sap.ui.define([
         };//redefine setData, make it so that it convers every entry into an object before adding into the collection
         
         ObjectModel.prototype.getDataFromDb = function(oSettings){ 
-        	//perhaps this is the proper location to convert whatever info from the DB into a {id, changeRecords[]} kind of object?
-        };//load the data from the database using the info in the settings object (manifest)
+        	var oProm = new Promise(function(resolve, reject){
+				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;// || window.shimIndexedDB;
+				if(!indexedDB){ throw new Error("No indexed DB support");}
+				
+				// Open (or create) the database
+				var oRequest = indexedDB.open(this.oSettings.db, 1);
+
+				// Create the schema
+				oRequest.onupgradeneeded = this.createDbTable.bind(this);
+
+				oRequest.onsuccess = function(oEvent) {
+					var db = oEvent.target.result;					
+					var tx = db.transaction(this.oSettings.store, "readwrite");
+					var store = tx.objectStore(this.oSettings.store);
+					var oGetStore = store.getAll();
+					
+					oGetStore.onsuccess = function(oEvent){
+				    	resolve(oEvent.target.result);
+					}.bind(this)
+					
+					oGetStore.onerror = function(oEvent){
+						reject( new Error("IndexedDb not accessible") );
+					}.bind(this)
+				
+				}.bind(this);	
+				
+				oRequest.onError = function(oEvent){
+					reject( new Error("IndexedDb not accessible") );
+				}.bind(this)
+			}.bind(this) );
+			
+			return oProm;
+        };//load the data from the database using the info in the settings object (manifest) (promise)
+
+        ObjectModel.prototype.saveDataToDb = function(aData){ 
+        	//assumption: the data records coming in via the aData array, are already processed into business objects
+        	//
+        	var oProm = new Promise(function(resolve, reject){
+        		if(! (aData instanceof Array) ){
+        			reject( new Error("saveToDb only accepts an array of serializable business objects"));
+        			return;
+        		}
+        		
+				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;// || window.shimIndexedDB;
+				if(!indexedDB){ throw new Error("No indexed DB support");}
+				
+				// Open (or create) the database
+				var oRequest = indexedDB.open(this.oSettings.db, 1);
+
+				// Create the schema (if necessary)
+				oRequest.onupgradeneeded = this.createDbTable.bind(this);
+
+				oRequest.onsuccess = function(oEvent) {
+					var db = oEvent.target.result;					
+					var tx = db.transaction(this.oSettings.store, "readwrite");
+					var store = tx.objectStore(this.oSettings.store);
+					
+					//can't I simply put all records at once?
+					var aProm = [];
+					for(var i = 0; i < aData.length; i++){
+						var oData = aData[i];
+						var oProm = new Promise(function(putResolve, putReject){
+							var oPutStore = store.put(oData.getJSON() , oData.id); //or do I need to call, getJSON?
+							
+							oPutStore.onsuccess = function(oEvent){
+						    	putResolve(oEvent.target.result);
+							}.bind(this)
+							
+							oPutStore.onerror = function(oEvent){
+								reject( new Error("IndexedDb not accessible") );
+							}.bind(this)
+						});
+						aProm.push(oProm);
+					}
+
+					Promise.all(aProm)
+					.then(function(aResults){
+						resolve(aResults); 
+					}.bind(this))
+					.catch(function(reason){ //what if something failed?
+					  jQuery.sap.log.error(reason);
+					  reject(reason);
+					}.bind(this));
+				
+				}.bind(this);	
+				
+				oRequest.onError = function(oEvent){
+					reject( new Error("IndexedDb not accessible") );
+				}.bind(this)
+			}.bind(this) );
+			
+			return oProm;
+        };//load the data from the database using the info in the settings object (manifest) (promise)
         
-        ObjectModel.prototype.createDbTable = function(oSettings, oData){ };//Create your DB-table from the received data
+        ObjectModel.prototype.createDbTable = function(oEvent){ 
+		    var db = oEvent.target.result;
+		    var store = db.createObjectStore(this.oSettings.store , {keyPath: "id"});
+        };//Create your DB-table from the received data (promise)
 
         ObjectModel.prototype.sync = function( oLastSyncDate, sModelName ){ 
         	var sName = sModelName || "Unnamed";
@@ -249,6 +351,7 @@ sap.ui.define([
 					sUrl = "" + sUrl + "?";
 				}
 
+				/*
 				//prepare a newDataDownloaded function
 				var fnNewDataDownloaded = function(oData){
 					this.setData(oData, true);
@@ -270,15 +373,33 @@ sap.ui.define([
 				    success : fnNewDataDownloaded,
 				    error : fnDownloadFailed
 				});
-	
+				*/
+				
+				this.loadData(sUrl + "since=" + sSince, 
+					{
+						dataType : "json",
+	    				async: true
+					},
+					true,
+					"json",
+	    			true
+	    		);
+	    			
 		        //check if your local db exists: if not, create it based on what you just retrieved ({id:xx, {jsonobject} })/or {id, timestamp, otherfields...}
 		        //send everything changed in this model since the lastSyncDate to the service url (post)
 		        //add your delta-array to the DB
+		        
 		        //preferably, do all this in a worker or a promise
 			}.bind(this) );
 			
 			return oPromise;
-        };//sync your DB content with the server content
+        };//sync your DB content with the server content //#TODO
+
+        ObjectModel.prototype.storeSyncProperties = function(){
+        };//#TODO
+
+        ObjectModel.prototype.loadSyncProperties = function(){
+        };//#TODO
         
         ObjectModel.prototype.onPropertyUpdated = function(sPath, oValue){
         	//debugger;
@@ -290,7 +411,7 @@ sap.ui.define([
 
         }; //static constructor
 
-        ObjectModel.ClassConstructor(); //statically call the class constructor
+        setTimeout(ObjectModel.ClassConstructor.bind(this),1); //statically call the class constructor (after completionof definition)
 
         return ObjectModel;
     }

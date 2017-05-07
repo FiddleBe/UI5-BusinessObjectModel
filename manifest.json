@@ -11,7 +11,7 @@
 		"title": "{{appTitle}}",
 		"description": "{{appDescription}}",
 		"dataSources": {
-			"contacts": {
+			"monsters": {
 				"uri": "/service/monsters.php",
 				"type": "JSON",
 				"settings": {
@@ -44,7 +44,7 @@
 		"rootView": {
 			"viewName": "be.fiddle.BusinessObjectModel.view.Monsters",
 			"type": "XML",
-			"id":"Home"
+			"id":"Monsters"
 		},
 		"dependencies": {
 			"minUI5Version": "1.30.0",
@@ -65,12 +65,14 @@
 					"bundleName": "be.fiddle.BusinessObjectModel.i18n.i18n"
 				}
 			},
-			"contacts": {
+			"monsters": {
 				"type": "be.fiddle.BusinessObjectModel.model.BusinessObjectModel",
-				"dataSource": "contacts",
+				"dataSource": "monsters",
 				"settings": {
 					"testData": "/service/monsters.json",
                     "ObjectClass":"be.fiddle.BusinessObjectModel.model.businessobject.Monster",
+                    "db":"ui5busobjModel",
+                    "store":"monsters",
 					"metadataUrlParams": {
 						"sap-documentation": "heading"
 					}

@@ -92,7 +92,7 @@ class Db {
 		$result->close();		
 		$this->closeDBmysql($mysql);
 
-		return  '{"entries":[' . $json . ']}';	
+		return  '[' . $json . ']';	
 	}
 	
 	private function getDBmysql($user, $pass){

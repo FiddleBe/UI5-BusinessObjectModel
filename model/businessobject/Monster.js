@@ -3,17 +3,17 @@ sap.ui.define([
 ], function(BusinessObject) {
 	"use strict";
 
-	var Contact = BusinessObject.extend("be.fiddle.BusinessObjectModel.model.BusinessObject.Contact", {
+	var Monster = BusinessObject.extend("be.fiddle.BusinessObjectModel.model.BusinessObject.Monster", {
 		constructor: function(oData){
 			BusinessObject.prototype.constructor.apply(this, arguments);
 		}	
 	});
 	
-	Contact.prototype.save = function(){
+	Monster.prototype.save = function(){
 		
 	};
 
-	Contact.prototype.delete = function(){
+	Monster.prototype.delete = function(){
 		
 	};
 

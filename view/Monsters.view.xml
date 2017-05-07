@@ -1,14 +1,26 @@
 <mvc:View	controllerName="be.fiddle.BusinessObjectModel.controller.Monsters" 
 			xmlns:html="http://www.w3.org/1999/xhtml" 
 			xmlns:mvc="sap.ui.core.mvc" 
-			xmlns="sap.m">
-	<Page title="{i18n>home}" id="pageContact"  showHeader="false" >
+			xmlns="sap.m"
+			height="100%"
+			displayBlock="true" >
+	<Page	title="{i18n>home}" 
+			id="pageMonsters"  
+			showHeader="true" 
+			height="100%">
 		<content>
-			<NavContainer id="BusinessObjectModelMain">
-				<pages>
 <!-- views loaded lazily and dynamically, when they are needed-->
-				</pages>
-			</NavContainer>
+			<List	items="{monsters>/entries}">
+				<StandardListItem
+					title="{monsters>id}"
+					description="" />						
+			</List>
 		</content>
+			
+		<footer>
+			<Toolbar>
+				<Button text="Sync" press="onSync" icon="sap-icon://synchronize" />
+			</Toolbar>
+		</footer>					
 	</Page>
 </mvc:View>
