@@ -9,12 +9,34 @@
 			showHeader="true" 
 			height="100%">
 		<content>
+<<<<<<< HEAD
 <!-- views loaded lazily and dynamically, when they are needed-->
 			<List	items="{monsters>/entries}">
 				<StandardListItem
 					title="{monsters>id}"
 					description="" />						
 			</List>
+=======
+			<table items="{monsters>/entries}">
+				<columns>
+					<Column width="12em"><Text text="Id" /></Column>
+					<Column><Text text="Type" /></Column>
+					<Column><Text text="Changes" /></Column>
+				</columns>
+
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ObjectIdentifier 	title="{monsters>name}"
+												text="{monsters>id}"/>
+							<Text text="{monsters>type}" />
+							<ObjectNumber	number="{= ${monsters>changeRecords}.length }"
+											unit="changes" />
+						</cells>
+					</ColumnListItem>
+				</items>				
+			</table>
+>>>>>>> branch 'master' of https://github.com/FiddleBe/UI5-BusinessObjectModel
 		</content>
 			
 		<footer>
