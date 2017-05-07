@@ -9,14 +9,6 @@
 			showHeader="true" 
 			height="100%">
 		<content>
-<<<<<<< HEAD
-<!-- views loaded lazily and dynamically, when they are needed-->
-			<List	items="{monsters>/entries}">
-				<StandardListItem
-					title="{monsters>id}"
-					description="" />						
-			</List>
-=======
 			<table items="{monsters>/entries}">
 				<columns>
 					<Column width="12em"><Text text="Id" /></Column>
@@ -36,7 +28,6 @@
 					</ColumnListItem>
 				</items>				
 			</table>
->>>>>>> branch 'master' of https://github.com/FiddleBe/UI5-BusinessObjectModel
 		</content>
 			
 		<footer>
