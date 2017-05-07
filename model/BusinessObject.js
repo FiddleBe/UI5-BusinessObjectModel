@@ -16,7 +16,7 @@
  * {id:1, name:"Tom", age:"30", work:"developer", ... }
 **/
 sap.ui.define([
-        "sap/ui/base/ManagedObject" //test the managedObject instead of EventProvider
+        "sap/ui/base/EventProvider" //test the managedObject instead of EventProvider
 ],
     function (BaseObject) {
         "use strict";

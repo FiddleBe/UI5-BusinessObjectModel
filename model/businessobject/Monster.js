@@ -3,7 +3,7 @@ sap.ui.define([
 ], function(BusinessObject) {
 	"use strict";
 
-	var Monster = BusinessObject.extend("be.fiddle.BusinessObjectModel.model.BusinessObject.Monster", {
+	var Monster = BusinessObject.extend("be.fiddle.BusinessObjectModel.model.businessobject.Monster", {
 		constructor: function(oData){
 			BusinessObject.prototype.constructor.apply(this, arguments);
 		}	
@@ -16,6 +16,10 @@ sap.ui.define([
 	Monster.prototype.delete = function(){
 		
 	};
+
+    Monster.getObject = function(oData){
+    	return new Monster(oData);
+    };//factory to get the right child object
 
 	return Monster;
 });
