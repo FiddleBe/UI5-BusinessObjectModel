@@ -381,7 +381,7 @@ sap.ui.define([
 	    				async: true
 					},
 					true,
-					"json",
+					"GET",
 	    			true
 	    		);
 	    			
