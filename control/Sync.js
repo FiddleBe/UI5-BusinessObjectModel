@@ -138,14 +138,35 @@ sap.ui.define([
 	    		if(oResp.final === true){
 	    			oSync.uploading = false;
 	    		}
+	    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
 	    	}.bind(this))
 	    	.catch(function(oResp){
 	    		oSync.uploading = false;
+	    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
 	    	}.bind(this));
 	    };
 
 	    Sync.prototype.onDownloadPress = function(oEvent){
+	    	var oCtx = oEvent.getSource().getContextBinding("Sync");
+	    	var oSync = oCtx.getObject();
+	    	var sName = oCtx.getProperty("name");
+	    	var oModel = this.getModel(sName);
 	    	
+	    	oSync.downloading = true;
+	    	
+	    	oModel.downloadChanges(null, sName)
+	    	.then(function(oResp){
+	    		oSync.toDownload += (oResp.count * -1);
+	    		
+	    		if(oResp.final === true){
+	    			oSync.downloading = false;
+	    		}
+	    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+	    	}.bind(this))
+	    	.catch(function(oResp){
+	    		oSync.downloading = false;
+	    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+	    	}.bind(this));
 	    };
 
 	    Sync.prototype.onCancel = function (oEvent) {
