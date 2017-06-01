@@ -41,6 +41,8 @@ sap.ui.define([
                 	Model.prototype.constructor.apply(this, {} ); //pass an empty object to the jsonmodel, since the data will come from the DB
 	                this.getDataFromDb(oSettings)		//get data from db
 	                .then( this.setData.bind(this) );	//and move it into the object model
+	                
+	                this.loadSyncProperties(); //load, or initialize the sync properties
                 }else{
                 	Model.prototype.constructor.apply(this, arguments ); //there is no DB: online only: get data from service url
                 }
@@ -91,6 +93,44 @@ sap.ui.define([
                 return oData;
             }
         };//The context.getObject returns an instance of the template class, with the data loaded
+        
+        ObjectModel.prototype.getChangesSince = function(dLastSync){
+    		var i = (this.entries && this.entries.length ) || 0;
+    		var aChanges = [];
+    		
+    		if(!dLastSync){
+    			dLastSync = this._dLastUpload;
+    		}
+    		
+    		while(i--){
+    			oBusobj = this.entries[i];
+    			if(oBusobj instanceof BusinessObject ){
+    				aChanges = aChanges.concat(oBusobj.getChangesSince(dLastSync) );
+    			}
+    		}
+    		
+    		//make sure the changes are sorted by timestamp globally
+    		aChanges.sort(function(a,b){ 
+				if(a.timestamp < b.timestamp){
+					return -1;
+				}
+				if(a.timestamp > b.timestamp){
+					return 1;
+				}
+				
+				return 0;
+			});
+    		
+    		return aChanges;
+        };
+        
+        ObjectModel.prototype.getLastDownload = function(){
+        	return this._dLastDownload || new Date(0);
+        };
+        
+        ObjectModel.prototype.getLastUpload = function(){
+        	return this._dLastUpload || new Date(0);
+        };
         
         ObjectModel.prototype.setObject = function( sPath, oObject ){
         	if(sPath){
@@ -244,12 +284,12 @@ sap.ui.define([
 				var oRequest = indexedDB.open(this.oSettings.db, 1);
 
 				// Create the schema
-				oRequest.onupgradeneeded = this.createDbTable.bind(this);
+				oRequest.onupgradeneeded = this._createDbTable.bind(this);
 
 				oRequest.onsuccess = function(oEvent) {
-					var db = oEvent.target.result;					
-					var tx = db.transaction(this.oSettings.store, "readwrite");
-					var store = tx.objectStore(this.oSettings.store);
+					var oDb = oEvent.target.result;					
+					var oTx = oDb.transaction(this.oSettings.store, "readwrite");
+					var store = oTx.objectStore(this.oSettings.store);
 					var oGetStore = store.getAll();
 					
 					oGetStore.onsuccess = function(oEvent){
@@ -286,7 +326,7 @@ sap.ui.define([
 				var oRequest = indexedDB.open(this.oSettings.db, 1);
 
 				// Create the schema (if necessary)
-				oRequest.onupgradeneeded = this.createDbTable.bind(this);
+				oRequest.onupgradeneeded = this._createDbTable.bind(this);
 
 				oRequest.onsuccess = function(oEvent) {
 					var db = oEvent.target.result;					
@@ -330,82 +370,283 @@ sap.ui.define([
 			return oProm;
         };//load the data from the database using the info in the settings object (manifest) (promise)
         
-        ObjectModel.prototype.createDbTable = function(oEvent){ 
+        ObjectModel.prototype._createDbTable = function(oEvent){ 
 		    var db = oEvent.target.result;
 		    var store = db.createObjectStore(this.oSettings.store , {keyPath: "id"});
         };//Create your DB-table from the received data (promise)
 
-        ObjectModel.prototype.sync = function( oLastSyncDate, sModelName ){ 
+        ObjectModel.prototype.sync = function( sModelName ){ 
         	var sName = sModelName || "Unnamed";
         	jQuery.sap.log.info("starting sync process for model: " + this.sName );
         	
-        	var oPromise = new Promise(function(resolve, reject) {
-				//use the settings stored previously
-				var sUrl = this.sUrl;
-				var sSince = (oLastSyncDate && ("" + oLastSyncDate)) || "0";
-				
-				//prepare the url to receive parameters
-				if(sUrl.includes("?") ){
-					sUrl = "" + sUrl + "&";
-				}else{
-					sUrl = "" + sUrl + "?";
-				}
+        	var aPromises = [];
+        	aPromises.push(this.uploadchanges(this._dLastUpload, sModelName));
+        	aPromises.push(this.downloadchanges(this._dLastdownload, sModelName));
+			
+			return oPromise;
+        };//sync your DB content with the server content
 
-				/*
+        ObjectModel.prototype.getDownloadableChangesCount = function( dLastDownload, sModelName ){ 
+			//use the settings stored previously
+			var sUrl = this.sUrl;
+			var dLastSync = dLastDownload  ||  this._dLastDownload ||  new Date(0)
+			var sSince = "" + dLastSync;
+			
+			//prepare the url to receive parameters
+			if(sUrl.includes("?") ){
+				sUrl = "" + sUrl + "&";
+			}else{
+				sUrl = "" + sUrl + "?";
+			}
+				
+        	var oProm = new Promise(function(resolve, reject){
 				//prepare a newDataDownloaded function
 				var fnNewDataDownloaded = function(oData){
-					this.setData(oData, true);
-					resolve({"success":true, "data":oData, "message": "" + oData.length + " new objects have been downloaded for model " + sName });
+			        resolve({"success":true, "data":oData.count, "message":"number of changes:"});
 				}.bind(this) ;
 
 				//prepare a downloadFailed function
 				var fnDownloadFailed = function(oErr){
 					reject({"success":false, "data":oErr, "message":"Download new data failed for: " + sUrl });
 				}.bind(this) ;
-	        	
+
 				//first: get everything arrived on the server since last syncdate in a delta-array
-				jQuery.ajax({
-				    type : "GET",
+				var oGetProm = jQuery.get({
+				    contentType : "application/json",
+				    url : sUrl + "since=" + sSince + "$count",
+				    dataType : "json",
+				    async: true
+				});  
+				oGetProm.done(fnNewDataDownloaded.bind(this) );
+				oGetProm.fail(fnDownloadFailed.bind(this));
+				
+        	}.bind(this));
+
+			return oProm;
+        };
+        
+        ObjectModel.prototype.downloadChanges = function( dLastDownload, sModelName ){ 
+			//use the settings stored previously
+			var sUrl = this.sUrl;
+			var dLastSync = dLastDownload  ||  this._dLastDownload ||  new Date(0)
+			var sSince = "" + dLastSync;
+			
+			//prepare the url to receive parameters
+			if(sUrl.includes("?") ){
+				sUrl = "" + sUrl + "&";
+			}else{
+				sUrl = "" + sUrl + "?";
+			}
+				
+        	var oProm = new Promise(function(resolve, reject){
+				//prepare a newDataDownloaded function
+				var fnNewDataDownloaded = function(oData){
+			        //store sync properties
+			        this._dLastdownload = new Date();
+					this.storeSyncProperties();
+					
+					//append new data
+					this.setData(oData, true);
+					resolve({"success":true, "data":oData, "message": "" + oData.length + " new objects have been downloaded for model " + sName });
+	
+			        //store all your data in the database 
+			        //#TODO optimize this by only storing the changed objects: from the retrieved oData, loop and fetch every object by id.
+					var aEntries = this.getPropety("/entries");
+					this.saveDataToDb(aEntries); 
+				}.bind(this) ;
+
+				//prepare a downloadFailed function
+				var fnDownloadFailed = function(oErr){
+					reject({"success":false, "data":oErr, "message":"Download new data failed for: " + sUrl });
+				}.bind(this) ;
+
+				//first: get everything arrived on the server since last syncdate in a delta-array
+				var oGetProm = jQuery.get({
 				    contentType : "application/json",
 				    url : sUrl + "since=" + sSince,
 				    dataType : "json",
-				    async: true, 
-				    success : fnNewDataDownloaded,
-				    error : fnDownloadFailed
-				});
-				*/
+				    async: true
+				});  
+				oGetProm.done(fnNewDataDownloaded.bind(this) );
+				oGetProm.fail(fnDownloadFailed.bind(this));
 				
-				this.loadData(sUrl + "since=" + sSince, 
-					{
-						dataType : "json",
-	    				async: true
-					},
-					true,
-					"GET",
-	    			true
-	    		);
-	    			
-		        //check if your local db exists: if not, create it based on what you just retrieved ({id:xx, {jsonobject} })/or {id, timestamp, otherfields...}
-		        //send everything changed in this model since the lastSyncDate to the service url (post)
-		        //add your delta-array to the DB
-		        
-		        //preferably, do all this in a worker or a promise
-			}.bind(this) );
-			
-			return oPromise;
-        };//sync your DB content with the server content //#TODO
+        	}.bind(this));
 
-        ObjectModel.prototype.storeSyncProperties = function(){
-        };//#TODO
+			return oProm;
+        };//#TODO split this out in pageable downloads
+        
+        ObjectModel.prototype.uploadChanges = function( dLastUpload, sModelName ){ 
+			//use the settings stored previously
+			var sUrl = this.sUrl;
+			var dLastSync = dLastUpload  ||  this._dLastUpload ||  new Date(0)
+			var sSince = "" + dLastSync;
+			var aChanges = this.getChangesSince(dLastSync);
+			
+			//prepare the url to receive parameters
+			if(sUrl.includes("?") ){
+				sUrl = "" + sUrl + "&";
+			}else{
+				sUrl = "" + sUrl + "?";
+			}
+
+        	var oPromise = new Promise(function(resolve, reject) {
+        		if(!(aChanges instanceof Array)){
+        			resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sName })
+        			return;
+        		}
+        		
+				//prepare a newDataDownloaded function
+				var fnNewDataUploaded = function(oData){
+					if (aChanges.length > 0){
+						resolve({
+							"success":true, 
+							"data":{response:oData, count:aChunk.length, final:false}, 
+							"message": "" + aChunk.length + " changedocs have been uploaded for model " + sName 
+						});
+						
+						fnUploadChunk()
+					}else{
+						resolve({
+							"success":true, 
+							"data":{response:oData, count:aChunk.length, final:true}, 
+							"message": "" + aChunk.length + " changedocs have been uploaded for model " + sName 
+						});
+					}
+	
+			        //store sync properties
+			        var oLast = aChunk[aChunk.length];
+			        this._dLastUpload = oLast.timestamp;
+					this.storeSyncProperties();
+					
+				}.bind(this) ;
+	
+				//prepare a downloadFailed function
+				var fnUploadFailed = function(oErr){
+					reject({"success":false, "data":oErr, "message":"Upload changes failed for: " + sUrl });
+				}.bind(this) ;
+				
+				var fnUploadChunk = function(aChunk){
+		        	var aChunk = aChanges.splice(10);
+					
+					//second, upload all change documents since last syncdate to server
+					jQuery.ajax({
+					    type : "POST",
+					    contentType : "application/json",
+					    url : sUrl + "since=" + sSince,
+					    dataType : "json",
+					    data: aChunk,
+					    async: true, 
+					    success : fnNewDataUploaded,
+					    error : fnUploadFailed
+					});
+				}.bind(this);
+		        	
+        		fnUploadChunk();
+			}.bind(this) );
+        }; //#TODO: what if a chunk fails? next may only start if previous finishes
+
+        ObjectModel.prototype._createSyncProperties = function(oEvent){ 
+		    var db = oEvent.target.result;
+		    var store = db.createObjectStore("properties" , {keyPath: "id"});
+        };//Create your DB-table from the received data (promise)
 
         ObjectModel.prototype.loadSyncProperties = function(){
-        };//#TODO
-        
+        	var oProm = new Promise(function(resolve, reject){
+				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;// || window.shimIndexedDB;
+				if(!indexedDB){ reject( new Error("No indexed DB support"));}
+				
+				// Open (or create) the database
+				var oRequest = indexedDB.open("Sync", 1);
+
+				// Create the schema
+				oRequest.onupgradeneeded = this._createSyncProperties.bind(this);
+
+				oRequest.onsuccess = function(oEvent) {
+					var oDb = oEvent.target.result;					
+					var oTx = oDb.transaction("properties", "readwrite");
+					var store = oTx.objectStore("properties");
+					var oGetStore = store.get(this.oSettings.store); //get properties for current entity set
+					
+					oGetStore.onsuccess = function(oEvent){
+						if(oEvent.target.result){
+							this._dLastDownload = oEvent.target.result._dLastDownload;
+							this._dLastUpload = oEvent.target.result.lastUpload;
+						}else{
+							this._dLastDownload = new Date(0);
+							this._dLastUpload = new Date(0);
+						}
+				    	resolve(oEvent.target.result);
+					}.bind(this)
+					
+					oGetStore.onerror = function(oEvent){
+						this._dLastDownload = new Date(0);
+						this._dLastUpload = new Date(0);
+						reject( new Error("IndexedDb not accessible") );
+					}.bind(this)
+				
+				}.bind(this);	
+				
+				oRequest.onError = function(oEvent){
+					this._dLastDownload = new Date(0);
+					this._dLastUpload = new Date(0);
+					reject( new Error("IndexedDb not accessible") );
+				}.bind(this)
+			}.bind(this) );
+			
+			return oProm;
+        	
+        };//retrieve the last sync date from the properties db
+
+        ObjectModel.prototype.storeSyncProperties = function(){
+        	var oProm = new Promise(function(resolve, reject){
+        		if(! this._dLastSync ){
+        			this.d_lastSync = new Date(0);
+        		}
+        		
+				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;// || window.shimIndexedDB;
+				if(!indexedDB){ reject( new Error("No indexed DB support"));}
+				
+				// Open (or create) the database
+				var oRequest = indexedDB.open("Sync", 1);
+
+				// Create the schema (if necessary)
+				oRequest.onupgradeneeded = this._createSyncProperties.bind(this);
+
+				oRequest.onsuccess = function(oEvent) {
+					var oDb = oEvent.target.result;					
+					var oTx = oDb.transaction("properties", "readwrite");
+					var store = oTx.objectStore("properties");
+					
+					var oData = {
+						"id": this.oSettings.store,
+						"lastUpload": this._dLastUpload,
+						"lastDownload":this._dLastDownload
+					};
+
+					var oPutStore = store.put(oData , oData.id); //or do I need to call, getJSON?
+					
+					oPutStore.onsuccess = function(oEvent){
+				    	resolve(oEvent.target.result);
+					}.bind(this)
+					
+					oPutStore.onerror = function(oEvent){
+						reject( new Error("IndexedDb not accessible") );
+					}.bind(this)
+				}.bind(this);	
+				
+				oRequest.onError = function(oEvent){
+					reject( new Error("IndexedDb not accessible") );
+				}.bind(this)
+			}.bind(this) );
+			
+			return oProm;
+        };//store the sync properties
+
         ObjectModel.prototype.onPropertyUpdated = function(sPath, oValue){
         	//debugger;
         	//this.firePropertyChange({Reason:sap.ui.model.ChangeReason.Change, path:sPath, value:oValue});
 			this.refresh(); //refresh bindings (refine upto path?)
-        };
+        };//#TODO: optimize
         
         ObjectModel.ClassConstructor = function () {
 

@@ -4,15 +4,84 @@
 	<ResponsivePopover
 		title="{i18n}"
 		class="sapUiPopupWithPadding"
-		placement="Bottom" >
-		<beginButton>
-			<Button text="Action-A" press="handleCloseButton" />
-		</beginButton>
-		<endButton>
-			<Button text="Action-B" press="handleCloseButton" />
-		</endButton>
+		placement="Auto">
+		<subHeader>
+			<Toolbar>
+				<ToolbarSpacer/>
+				<Label	text="{i18n>be.fiddle.lib.model.offline.Sync.auto}"/>
+				<Switch state="{sync>/auto}"/>
+			</Toolbar>
+		</subHeader>
+
 		<content>
-			<Image src="{ProductPicUrl}" width="15em" densityAware="false" />
+			<Table	items="{sync>/entries}" 
+					class="fiddleSync sapUiNoMargin">
+				<columns>
+					<Column class="sapUiSmallMarginEnd" width="8rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.entity}"/></Column>
+					<Column class="sapUiSmallMarginEnd" width="12rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.lastSync}" /></Column>
+					<Column class="sapUiSmallMarginEnd" width="20rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.progress}"/></Column>
+				</columns>
+				
+				<items>
+					<ColumnListItem vAlign="Middle">
+						<Label text="{sync>name}"/>
+
+						<VBox templateShareable="false">
+							<Text class="sapUiSmallMargin" text="{
+								path:'sync>lastUpload', 
+								type:'sap.ui.model.type.Date', 
+								formatOptions: {
+									style: 'full'
+								}
+							}" />
+							
+							<Text class="sapUiSmallMargin" text="{
+								path:'sync>lastDownload', 
+								type:'sap.ui.model.type.Date', 
+								formatOptions: {
+									style: 'full'
+								}
+							}" />
+						</VBox>
+						
+						<VBox templateShareable="false">
+							<!--Upload-->
+							<HBox alignItems="Center" alignContent="Stretch">
+								<ProgressIndicator	class="sapUiSmallMarginEnd"
+													percentValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'be.fiddle.lib.model.offline.Sync.getProgress'}"
+													displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'be.fiddle.lib.model.offline.Sync.getProgressDisplay'}"
+													showValue="true"
+													state="None" 
+													width="18rem"/>
+								<Button	icon="sap-icon://upload-to-cloud"
+										size="2rem"
+										class="sapUiNoMargin"
+										press="onUploadPress"
+										enabled="{= !${sync>uploading} }"/>
+							</HBox>
+							
+							<!--Download-->
+							<HBox alignItems="Center" alignContent="Stretch">
+								<ProgressIndicator	class="sapUiSmallMarginEnd"
+													percentValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'be.fiddle.lib.model.offline.Sync.getProgress'}"
+													displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'be.fiddle.lib.model.offline.Sync.getProgressDisplay'}"
+													showValue="true"
+													state="None" 
+													width="18rem" />
+								<Button	icon="sap-icon://download-from-cloud"
+										size="2rem"
+										class="sapUiNoMargin"
+										press="onDownloadPress"
+										enabled="{= !${sync>downloading} }"/>
+							</HBox>
+						</VBox>						
+					</ColumnListItem>
+				</items>
+			</Table>
 		</content>
+		
+		<endButton>
+			<Button text="{i18n>be.fiddle.lib.model.offline.Sync.sync}" press="onSync" />
+		</endButton>		
 	</ResponsivePopover>
 </core:FragmentDefinition>

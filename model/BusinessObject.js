@@ -53,6 +53,22 @@ sap.ui.define([
         	else return false;
         };
 
+		BusObj.prototype.getChangesSince = function(dLastSync){
+        	if(! (this.changeRecords instanceof Array) ) return this.getJSON() ; //no changedocs, just return self-blob
+			
+			var aChanges = [];
+			//process every record //reverse loop
+			var i = aChangeRecords.length;
+			while(i--){
+				if( aChangeRecords[i].timestamp >= dLastSync){
+					aChanges.push(aChangeRecords[i]);
+				}else{
+					break; //changes are already sorted in time, so if the date is before the last sync, stop searching
+				}
+			}
+			return aChanges;
+		};
+		
         BusObj.prototype.getJSON = function () {
             var oJSON = {};
 

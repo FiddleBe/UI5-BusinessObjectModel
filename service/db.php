@@ -9,7 +9,7 @@ if(!$session){
 }
 
 //prepare
-$db = new Monster();
+$db = new Db();
 $input = json_decode(file_get_contents('php://input'),true);
 $method = $_SERVER['REQUEST_METHOD'];
 $user="monster_doctor"; //defaulted to generic user with limited rights
@@ -35,21 +35,23 @@ if(isset($_SESSION["PASS"]) ){
 switch ($method) { //CR based database with NoSQL
 	case 'GET':
 		if(isset( $input["timestamp"] ) ) 		$timestamp 			= $input["timestamp"];
+		if(isset( $input["entity"] ) ) 			$entity 			= $input["entity"];
+
+		if(isset( $input["count"] ) ){
+			echo $db->getChangesCount($entity, $timestamp, $user, $pass);
+		}else{
+			echo  $db->getEntitySince($entity, $timstamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
+		}
 		
-		echo  $db->getMonstersSince($timstamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
 		break;
 		
 	case 'POST':
 		if(isset( $input["id"] ) ) 				$id 				= $input["id"];
-		if(isset( $input["timestamp"] ) ) 		$timestamp 			= $input["timestamp"];
+		if(isset( $input["entity"] ) ) 			$entity 			= $input["entity"];
 		if(isset( $input["changeIndicator"] ) ) $changeIndicator 	= $input["changeIndicator"];
 		if(isset( $input["changeRecord"] ) ) 	$changeRecord		= $input["changeRecord"];
 
-		echo $db->addMonster( $id, $timestamp, $changeIndicator, $blob, $user, $pass ); 
+		echo $db->addEntity( $id, $entity, $changeIndicator, $blob, $user, $pass ); 
 		break;
 }
 ?>
-
-
-
-

@@ -12,7 +12,7 @@
 		"description": "{{appDescription}}",
 		"dataSources": {
 			"monsters": {
-				"uri": "/service/monsters.php",
+				"uri": "/service/db.php?entity=monsters",
 				"type": "JSON",
 				"settings": {
 					"annotations": []
