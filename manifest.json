@@ -42,9 +42,9 @@
 	"sap.ui5": {
 		"_version": "1.1.0",
 		"rootView": {
-			"viewName": "be.fiddle.BusinessObjectModel.view.Monsters",
+			"viewName": "be.fiddle.BusinessObjectModel.view.Shell",
 			"type": "XML",
-			"id":"Monsters"
+			"id":"Shell"
 		},
 		"dependencies": {
 			"minUI5Version": "1.30.0",
@@ -81,6 +81,58 @@
 		},
 		"resources": {
 			"css": []
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"viewPath": "be.fiddle.BusinessObjectModel.view",
+				"controlId": "monsterMain",
+				"controlAggregation": "pages",
+				"transition": "fade",
+				"bypassed": {
+					"target": ["Notfound"]
+				}
+			},
+			"targets": {
+				"Home": {
+					"viewName": "Monsters",
+					"viewId": "Monsters"
+				},
+				"Notfound": {
+					"viewName": "Notfound",
+					"viewId": "Notfound"
+				},
+				"Monsters": {
+					"viewName": "Monsters",
+					"viewId": "Monsters"
+				},
+				"Monster": {
+					"viewName": "Monster",
+					"viewId": "Monster"
+				}
+			},
+			"routes": [{
+				"name": "None",
+				"pattern": "",
+				"greedy": false,
+				"target": ["Monsters"]
+			}, {
+				"name": "Monsters",
+				"pattern": "Monsters/",
+				"greedy": false,
+				"target": ["Monsters"]
+			}, {
+				"name": "Monster",
+				"pattern": "Monsters/{id}",
+				"greedy": false,
+				"target": ["Monster"]
+			}, {
+				"name": "Notfound",
+				"pattern": ":all*:",
+				"greedy": false,
+				"target": ["Notfound"]
+			}]
 		}
 	}
 }

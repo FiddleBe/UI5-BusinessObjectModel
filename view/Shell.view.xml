@@ -1,0 +1,68 @@
+<mvc:View	
+	controllerName="be.fiddle.BusinessObjectModel.controller.Shell" 
+	displayBlock="true" 
+	xmlns:fiddle="be.fiddle.lib.model.offline"
+	xmlns:html="http://www.w3.org/1999/xhtml" 
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:m="sap.m"
+	xmlns="sap.tnt">
+	<ToolPage id="monsterShell">
+		<header>
+			<ToolHeader>
+				<m:ToggleButton	
+					icon="sap-icon://menu2"
+					type="Transparent"
+					press="onToggleMenu"
+					pressed="true">
+					<m:layoutData>
+						<m:OverflowToolbarLayoutData priority="NeverOverflow" />
+					</m:layoutData>
+				</m:ToggleButton>
+				
+				<m:ToolbarSpacer/>
+				<m:Text text="{i18n>be.fiddle.BusinessObjectModel.shell.title}" wrapping="false">
+		            <m:layoutData>
+		                <m:OverflowToolbarLayoutData priority="Disappear" />
+		            </m:layoutData>
+		        </m:Text>	
+				<m:ToolbarSpacer/>
+   				<fiddle:Sync text="Sync" icon="sap-icon://synchronize" />
+
+			</ToolHeader>
+		</header>
+		
+		<sideContent>
+			<SideNavigation	expanded="true"
+							itemSelect="onNavPress">
+				<NavigationList>
+					<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.monsters}"
+										icon="sap-icon://person-placeholder"
+										enabled="true"
+										expanded="true"
+										key="Monsters">
+<!--						<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.monsters.search}"
+											key="Monsters"
+											enabled="true" />
+-->					</NavigationListItem>
+				</NavigationList>
+				
+				<fixedItem>
+					<NavigationList>
+						<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.about}"
+											key="About"
+											icon="sap-icon://sys-help" />
+					</NavigationList>
+				</fixedItem>
+				
+			</SideNavigation>
+		</sideContent>
+		
+		<mainContents>
+			<m:NavContainer id="monsterMain">
+				<m:pages>
+<!-- views loaded lazily and dynamically, when they are needed-->
+				</m:pages>
+			</m:NavContainer>
+		</mainContents>
+	</ToolPage>
+</mvc:View>

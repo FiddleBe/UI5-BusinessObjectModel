@@ -17,6 +17,11 @@ sap.ui.define([
 		});
 	};
 	
+	MonstersCtrl.prototype.onPressAdd = function(oEvent){
+		var oMonster = this.getView().getModel("monsters").create();
+		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
+	};
+	
 	return MonstersCtrl;
 
 });

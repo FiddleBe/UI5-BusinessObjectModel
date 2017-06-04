@@ -1,13 +1,11 @@
 <mvc:View	controllerName="be.fiddle.BusinessObjectModel.controller.Monsters" 
-			xmlns:fiddle="be.fiddle.lib.model.offline"
 			xmlns:html="http://www.w3.org/1999/xhtml" 
 			xmlns:mvc="sap.ui.core.mvc" 
 			xmlns="sap.m"
 			height="100%"
 			displayBlock="true" >
-	<Page	title="{i18n>home}" 
-			id="pageMonsters"  
-			showHeader="true" 
+	<Page	id="pageMonsters"  
+			showHeader="false" 
 			height="100%">
 		<content>
 			<Table items="{monsters>/entries}">
@@ -33,7 +31,7 @@
 			
 		<footer>
 			<Toolbar>
-				<fiddle:Sync text="Sync" icon="sap-icon://synchronize" />
+				<Button text="Add" icon="sap-icon://add" press="onPressAdd" />
 			</Toolbar>
 		</footer>					
 	</Page>
