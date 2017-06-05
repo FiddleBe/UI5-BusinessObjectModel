@@ -76,16 +76,33 @@ sap.ui.define([
             var oData = Model.prototype.getObject.apply(this, arguments);
 			
 			if( oData instanceof BusinessObject ){ //if the object retrieved from the model is already an instance
-            	oData.attachPropertyUpdated(null, this.onPropertyUpdated, this);
-				return oData;
+				var oObject = oData; //I should use "let", but webide doesn't support
+				
+				//make sure you remove the old handlers
+            	oObject.detachPropertyUpdated(null, this.onPropertyUpdated, this);
+	            oObject.detachSaveRequested(null, this.onSaveDateToDb, this);
+	            
+	            //and attach new ones
+            	oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
+	            oObject.attachSaveRequested(null, this.onSaveDateToDb, this);
+	            
+				return oObject;
 			}
             else if( sPath.startsWith("/entries") && window[this.objectClass] instanceof BusinessObject) {
                 //by doing this, we create a new instance of the template class and pass the reference of our model-data
                 //in theory, if you update th contents of the data-object, they will also update in the model and trigger changes
                 //that's because the oData variable is a pointer to the model data entry.
                 //but that's the theory. I wonder how it will work in practice
-                var oObject = this.objectClass.getObject(oData);
-	            oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
+                var oObject = this.objectClass.getObject(oData); //I should use "let", but webide doesn't support
+
+				//make sure you remove the old handlers
+            	oObject.detachPropertyUpdated(null, this.onPropertyUpdated, this);
+	            oObject.detachSaveRequested(null, this.onSaveDateToDb, this);
+	            
+	            //and attach new ones
+            	oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
+	            oObject.attachSaveRequested(null, this.onSaveDateToDb, this);
+	            
                 return oObject;
             }
             else {
@@ -189,7 +206,11 @@ sap.ui.define([
             return oObject;
         };//add a new object to the collection
 
-        ObjectModel.prototype.removeObject = function (sPath, oObject) {
+        ObjectModel.prototype.removeObject = function (sPath /*optional*/, oObject) {
+        	if(!(typeof sPath === "string") || sPath instanceof BusinessObject) {
+        		oObject = sPath;
+        		sPath = "/entries";
+        	}
             var aObjects = this.getProperty(sPath);
 
         	if(!sPath){
@@ -205,7 +226,7 @@ sap.ui.define([
             }
 
             for (var i = 0; i < aObjects.lenght; i++) {
-                if(aObjects[i] === oObject){
+                if(aObjects[i].isThisYou(oObject) ){
                     aObjects.splice(i, 1);
                 }
             }
@@ -219,23 +240,28 @@ sap.ui.define([
 				sURL = this.sUrl;
 			}
 			
-			//fallback to test data
-            if(this.sTestData && sURL !== this.sTestData){
-            	this.attachRequestFailed( {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
-            							this.loadTestData, 
-            							this );
-				this.attachParseError(  {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
-            							this.loadTestData, 
-            							this );
-            }
-
-            Model.prototype.loadData.call(this,sURL, oParameters, bAsync, sType, bMerge, bCache, mHeaders); //trigger the superior model implementation
+			var oPromise = new Promise(function(resolve, reject){
+				//fallback to test data
+	            if(this.sTestData && sURL !== this.sTestData){
+	            	this.attachRequestFailed( {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
+	            							this.loadTestData, 
+	            							this );
+					this.attachParseError(  {oParameters:oParameters, bAsync:bAsync, sType:sType, bMerge:bMerge, bCache:bCache, mHeaders:mHeaders}, 
+	            							this.loadTestData, 
+	            							this );
+	            }
+				this.attachRequestCompleted(function(oEvent){ resolve(oEvent.data) });
+				
+	            Model.prototype.loadData.call(this,sURL, oParameters, bAsync, sType, bMerge, bCache, mHeaders); //trigger the superior model implementation
+			});
+			
+			return oPromise;
         };//redefine setData, make it so that it convers every entry into an object before adding into the collection
         
         ObjectModel.prototype.loadTestData = function(oData){
 			this.detachRequestFailed(this.loadTestData, this);
 			this.detachParseError(this.loadTestData, this);
-			this.loadData(this.sTestData, oData.oParameters, oData.bAsync, oData.sType, oData.bMerge, oData.bCache, oData.mHeaders);
+			return this.loadData(this.sTestData, oData.oParameters, oData.bAsync, oData.sType, oData.bMerge, oData.bCache, oData.mHeaders);
         };//backup for test data
         
         ObjectModel.prototype.setData = function (oData, bMerge) {
@@ -310,11 +336,11 @@ sap.ui.define([
 			return oProm;
         };//load the data from the database using the info in the settings object (manifest) (promise)
 
-        ObjectModel.prototype.saveDataToDb = function(aData){ 
+        ObjectModel.prototype.saveDataToDb = function(aObjects){ 
         	//assumption: the data records coming in via the aData array, are already processed into business objects
         	//
         	var oProm = new Promise(function(resolve, reject){
-        		if(! (aData instanceof Array) ){
+        		if(! (aObjects instanceof Array) ){
         			reject( new Error("saveToDb only accepts an array of serializable business objects"));
         			return;
         		}
@@ -335,16 +361,25 @@ sap.ui.define([
 					
 					//can't I simply put all records at once?
 					var aProm = [];
-					for(var i = 0; i < aData.length; i++){
-						var oData = aData[i];
+					for(var i = 0; i < aObjects.length; i++){
+						var oObject = aObjects[i];
 						var oProm = new Promise(function(putResolve, putReject){
-							var oPutStore = store.put(oData.getJSON() , oData.id); //or do I need to call, getJSON?
+							var oData = oObject.getJSON();
+							
+							if(oObject.changeRecords && oObject.changeRecords.length > 0){
+								var oLastChange = oObject.changeRecords[oObject.changeRecords.length - 1];
+								oLastChange._stored = true;		////try to mark as stored
+							}
+							
+							var oPutStore = store.put(oData );// , oObject.id); //put to db
 							
 							oPutStore.onsuccess = function(oEvent){
+								oObject.onSaveComplete(oEvent);
 						    	putResolve(oEvent.target.result);
 							}.bind(this)
 							
 							oPutStore.onerror = function(oEvent){
+								oObject.onSaveFailed(oEvent);
 								reject( new Error("IndexedDb not accessible") );
 							}.bind(this)
 						});
@@ -440,19 +475,35 @@ sap.ui.define([
 				
         	var oProm = new Promise(function(resolve, reject){
 				//prepare a newDataDownloaded function
-				var fnNewDataDownloaded = function(oData){
-			        //store sync properties
-			        this._dLastdownload = new Date();
-					this.storeSyncProperties();
-					
-					//append new data
-					this.setData(oData, true);
-					resolve({"success":true, "data":oData, "message": "" + oData.length + " new objects have been downloaded for model " + sName });
-	
-			        //store all your data in the database 
-			        //#TODO optimize this by only storing the changed objects: from the retrieved oData, loop and fetch every object by id.
-					var aEntries = this.getPropety("/entries");
-					this.saveDataToDb(aEntries); 
+				var fnNewDataDownloaded = function(aChunk){
+					if (aChunk instanceof Array && aChunk.length > 0){
+						this.setData(aChunk, true); //merge
+						
+				        //store all your data in the database 
+				        //#TODO optimize this by only storing the changed objects: from the retrieved oData, loop and fetch every object by id.
+						var aEntries = this.getPropety("/entries");
+						this.saveDataToDb(aEntries); 
+						
+						//progress report
+						resolve({
+							"success":true, 
+							"data":{response:oData, count:aChunk.length, final:false}, 
+							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sName 
+						});
+						
+				        //store sync properties
+				        var oLast = aChunk[aChunk.length];
+				        this._dLastdownload = oLast.timestamp;
+						this.storeSyncProperties();
+						
+						fnDownloadChunk();
+					}else{
+						resolve({
+							"success":true, 
+							"data":{response:aChunk, count:0, final:true}, 
+							"message": "all changes downloaded for model " + sName 
+						});
+					}
 				}.bind(this) ;
 
 				//prepare a downloadFailed function
@@ -460,15 +511,21 @@ sap.ui.define([
 					reject({"success":false, "data":oErr, "message":"Download new data failed for: " + sUrl });
 				}.bind(this) ;
 
-				//first: get everything arrived on the server since last syncdate in a delta-array
-				var oGetProm = jQuery.get({
-				    contentType : "application/json",
-				    url : sUrl + "since=" + sSince,
-				    dataType : "json",
-				    async: true
-				});  
-				oGetProm.done(fnNewDataDownloaded.bind(this) );
-				oGetProm.fail(fnDownloadFailed.bind(this));
+				var fnDownloadChunk = function(){
+					//first: get 10 changes arrived on the server since last syncdate in a delta-array
+					var oGetProm = this.loadData(sUrl, {"since": sSince }, true, "GET", true );
+					
+					/*jQuery.get({
+					    contentType : "application/json",
+					    url : sUrl + "since=" + sSince, //db service will only return 10 results at a time. (safety)
+					    dataType : "json",
+					    async: true
+					});  */
+					oGetProm.done(fnNewDataDownloaded.bind(this) );
+					oGetProm.fail(fnDownloadFailed.bind(this));
+				}
+				
+				fnDownloadChunk();
 				
         	}.bind(this));
 
@@ -642,6 +699,13 @@ sap.ui.define([
 			return oProm;
         };//store the sync properties
 
+		ObjectModel.prototype.onSaveDateToDb = function(oEvent){
+			var oObject = oEvent.getParameter("oObject");
+			if(oObject)	{
+				this.saveDataToDb([oObject]); //save
+			}
+		};
+		
         ObjectModel.prototype.onPropertyUpdated = function(sPath, oValue){
         	//debugger;
         	//this.firePropertyChange({Reason:sap.ui.model.ChangeReason.Change, path:sPath, value:oValue});

@@ -9,35 +9,14 @@
 			showHeader="false" 
 			height="100%">
 		<content>
-			<f:SimpleForm	id="SimpleFormChange354wide"
-							editable="true"
-							layout="ResponsiveGridLayout"
-							title="Address"
-							labelSpanXL="4"
-							labelSpanL="3"
-							labelSpanM="4"
-							labelSpanS="12"
-							adjustLabelSpan="false"
-							emptySpanXL="0"
-							emptySpanL="4"
-							emptySpanM="0"
-							emptySpanS="0"
-							columnsXL="2"
-							columnsL="1"
-							columnsM="1"
-							singleContainerFullSize="false">
-				<f:content>
-					<Label text="Name" />
-					<Input value="{monster>name}" />
-					
-					<Label text="Type" />
-					<Input value="{monster>type}" />
-
-					<Label text="special ability" />
-					<Input value="{monster>ability}" />
-
-				</f:content>
-			</f:SimpleForm>			
+			<!--I made this bit dynamic, just because I'm lazy. In reality, you would build specific views, bound to the businessobject directly-->
+			<VBox items="{pairs>/}">
+				<HBox>
+					<Input value="{pairs>key}" width="10rem" editable="{pairs>bKeyEditable}"/>
+					<Input value="{pairs>value}"/>
+				</HBox>
+			</VBox>
+			<Button text="additional property" icon="sap-icon://add" press="onPressAdditionalProperty" />
 		</content>
 			
 		<footer>

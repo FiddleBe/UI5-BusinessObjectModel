@@ -6,11 +6,16 @@ sap.ui.define([
 	var Monster = BusinessObject.extend("be.fiddle.BusinessObjectModel.model.businessobject.Monster", {
 		constructor: function(oData){
 			BusinessObject.prototype.constructor.apply(this, arguments);
+			
+			//monsters are changerecord sensitive (I know, since I built the service)
+			if(!this.changeRecords){
+				this.changeRecords = [];
+			}
 		}	
 	});
 	
 	Monster.prototype.save = function(){
-		
+		BusinessObject.prototype.save.apply(this, arguments);
 	};
 
 	Monster.prototype.delete = function(){

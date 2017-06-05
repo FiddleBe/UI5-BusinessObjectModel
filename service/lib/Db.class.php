@@ -48,7 +48,7 @@ class Db {
 		$timestamp = date('Y-m-d H:i:s', $timestamp);
 		$entity	   = base64_encode( $entity );
 
-		$monsters = $this->getFromDatabaseAsJSON( "select * from `Monsters`.`entity` where entity = $entity and timestamp >= $timestamp;", $user, $pass );
+		$monsters = $this->getFromDatabaseAsJSON( "select * from `Monsters`.`entity` where entity = $entity and timestamp > $timestamp order by timestamp ascending limit 10;", $user, $pass );
 		return $monsters;
 	}
 
@@ -67,7 +67,7 @@ class Db {
 		$mysql = $this->getDBmysql($user, $pass);
 		// excecute SQL statement
 		if($mysql){
-			$result = $mysql->query("select count( id ) from `Monsters`.`entity` where entity = $entity and timestamp >= $timestamp;");			
+			$result = $mysql->query("select count( id ) from `Monsters`.`entity` where entity = $entity and timestamp > $timestamp;");			
 		}
 
 		$json = "";

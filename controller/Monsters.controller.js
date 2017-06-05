@@ -22,6 +22,11 @@ sap.ui.define([
 		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
 	};
 	
+	MonstersCtrl.prototype.onItemPress = function(oEvent){
+		var oMonster = oEvent.getParameter("listItem").getBindingContext("monsters").getObject();
+		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
+	};
+	
 	return MonstersCtrl;
 
 });
