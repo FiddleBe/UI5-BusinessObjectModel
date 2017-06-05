@@ -559,16 +559,16 @@ sap.ui.define([
 					if (aChanges.length > 0){
 						resolve({
 							"success":true, 
-							"data":{response:oData, count:aChunk.length, final:false}, 
-							"message": "" + aChunk.length + " changedocs have been uploaded for model " + sName 
+							"data":{response:oData, count:1, final:false}, 
+							"message": "1 changedoc has been uploaded for model " + sName 
 						});
 						
 						fnUploadChunk()
 					}else{
 						resolve({
 							"success":true, 
-							"data":{response:oData, count:aChunk.length, final:true}, 
-							"message": "" + aChunk.length + " changedocs have been uploaded for model " + sName 
+							"data":{response:oData, count:1, final:true}, 
+							"message": "1 final changedoc has been uploaded for model " + sName 
 						});
 					}
 	
@@ -584,16 +584,16 @@ sap.ui.define([
 					reject({"success":false, "data":oErr, "message":"Upload changes failed for: " + sUrl });
 				}.bind(this) ;
 				
-				var fnUploadChunk = function(aChunk){
-		        	var aChunk = aChanges.splice(10);
+				var fnUploadChunk = function(){
+		        	var oChangeDoc = aChanges.splice(1);
 					
-					//second, upload all change documents since last syncdate to server
+					//second, upload change document since last syncdate to server
 					jQuery.ajax({
 					    type : "POST",
 					    contentType : "application/json",
 					    url : sUrl + "since=" + sSince,
 					    dataType : "json",
-					    data: aChunk,
+					    data: oChangeDoc,
 					    async: true, 
 					    success : fnNewDataUploaded,
 					    error : fnUploadFailed

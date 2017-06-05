@@ -106,8 +106,9 @@ function (BaseObject) {
 		//process every record //reverse loop
 		var i = this.changeRecords.length;
 		while(i--){
+			var oChange = this.changeRecords[i];
 			if( this.changeRecords[i].timestamp >= dLastSync){
-				aChanges.push(this.changeRecords[i]);
+				aChanges.push({id:this.id, timestamp:oChange.timestamp, changeIndicator:oChange.changeIndicator, changeRecord:oChange});
 			}else{
 				break; //changes are already sorted in time, so if the date is before the last sync, stop searching
 			}

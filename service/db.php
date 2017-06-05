@@ -10,9 +10,7 @@ if(!$session){
 
 //prepare
 $db = new Db();
-ini_set("allow_url_fopen", true);
 $input = file_get_contents('php://input');
-echo $input;
 $input = json_decode($input,true);
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -20,8 +18,8 @@ $user="monster_doctor"; //defaulted to generic user with limited rights
 $pass="bE}3s2TNVsA;"; //defaulted to generic user with limited rights
 
 $id = 0;
-$timestamp = $_GET['since'];
-$entity = $_GET['entity'];
+$timestamp = $_GET["since"];
+$entity = $_GET["entity"];
 $changeIndicator = "U";
 $changeRecord="{}";
 
@@ -45,9 +43,9 @@ if(isset($_SESSION["PASS"]) ){
 switch ($method) { //CR based database with NoSQL
 	case 'GET':
 		if(isset( $input["since"] ) ) 		$timestamp 			= $input["timestamp"];
-		if(isset( $input["entity"] ) ) 			$entity 			= $input["entity"];
+		if(isset( $input["entity"] ) ) 		$entity 			= $input["entity"];
 
-		if(isset( $input["count"] ) ){
+		if(isset( $_GET["count"] ) ){
 			echo $db->getChangesCount($entity, $timestamp, $user, $pass);
 		}else{
 			echo  $db->getEntitySince($entity, $timestamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
