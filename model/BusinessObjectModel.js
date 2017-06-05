@@ -448,8 +448,9 @@ sap.ui.define([
 				//first: get everything arrived on the server since last syncdate in a delta-array
 				var oGetProm = jQuery.get({
 				    contentType : "application/json",
-				    url : sUrl + "since=" + sSince + "$count",
+				    url : sUrl + "since=" + sSince + "&count=true",
 				    dataType : "json",
+				    data:{since:sSince, count:true},
 				    async: true
 				});  
 				oGetProm.done(fnNewDataDownloaded.bind(this) );
@@ -513,14 +514,15 @@ sap.ui.define([
 
 				var fnDownloadChunk = function(){
 					//first: get 10 changes arrived on the server since last syncdate in a delta-array
-					var oGetProm = this.loadData(sUrl, {"since": sSince }, true, "GET", true );
+					/*var oGetProm = this.loadData(sUrl, {"since": sSince }, true, "GET", true );*/
 					
-					/*jQuery.get({
+					var ogetProm = jQuery.get({
 					    contentType : "application/json",
 					    url : sUrl + "since=" + sSince, //db service will only return 10 results at a time. (safety)
-					    dataType : "json",
+						dataType : "json",
+					    data: {since:sSince},
 					    async: true
-					});  */
+					});  
 					oGetProm.done(fnNewDataDownloaded.bind(this) );
 					oGetProm.fail(fnDownloadFailed.bind(this));
 				}

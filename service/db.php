@@ -10,10 +10,20 @@ if(!$session){
 
 //prepare
 $db = new Db();
-$input = json_decode(file_get_contents('php://input'),true);
+ini_set("allow_url_fopen", true);
+$input = file_get_contents('php://input');
+echo $input;
+$input = json_decode($input,true);
+
 $method = $_SERVER['REQUEST_METHOD'];
 $user="monster_doctor"; //defaulted to generic user with limited rights
 $pass="bE}3s2TNVsA;"; //defaulted to generic user with limited rights
+
+$id = 0;
+$timestamp = $_GET['since'];
+$entity = $_GET['entity'];
+$changeIndicator = "U";
+$changeRecord="{}";
 
 //authentication and session management
 if ( isset($_SERVER['PHP_AUTH_USER'] ) ){
@@ -34,13 +44,13 @@ if(isset($_SESSION["PASS"]) ){
 // create SQL based on HTTP method
 switch ($method) { //CR based database with NoSQL
 	case 'GET':
-		if(isset( $input["timestamp"] ) ) 		$timestamp 			= $input["timestamp"];
+		if(isset( $input["since"] ) ) 		$timestamp 			= $input["timestamp"];
 		if(isset( $input["entity"] ) ) 			$entity 			= $input["entity"];
 
 		if(isset( $input["count"] ) ){
 			echo $db->getChangesCount($entity, $timestamp, $user, $pass);
 		}else{
-			echo  $db->getEntitySince($entity, $timstamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
+			echo  $db->getEntitySince($entity, $timestamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
 		}
 		
 		break;
@@ -51,7 +61,7 @@ switch ($method) { //CR based database with NoSQL
 		if(isset( $input["changeIndicator"] ) ) $changeIndicator 	= $input["changeIndicator"];
 		if(isset( $input["changeRecord"] ) ) 	$changeRecord		= $input["changeRecord"];
 
-		echo $db->addEntity( $id, $entity, $changeIndicator, $blob, $user, $pass ); 
+		echo $db->addEntity( $id, $entity, $changeIndicator, $changeRecord, $user, $pass ); 
 		break;
 }
 ?>
