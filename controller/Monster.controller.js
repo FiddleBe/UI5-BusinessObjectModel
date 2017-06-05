@@ -52,6 +52,7 @@ sap.ui.define([
 		if(oMonster.save){
 			oMonster.save();
 		}
+		this.navBack();
 	};
 
 	MonsterCtrl.prototype.onPressCancel = function(oEvent){
@@ -61,10 +62,14 @@ sap.ui.define([
 			var oMonster = oCtx.getObject();
 			oCtx.getModel().removeObject( oMonster);
 		}
+		this.navBack();
+	};
+	
+	MonsterCtrl.prototype.navBack = function(){
 		if(window.history.length > 0){
 			window.history.back();
 		}else{
-			this.getOwnerComponent().getRouter().navTo("Home");
+			this.getOwnerComponent().getRouter().navTo("None");
 		}
 	};
 

@@ -5,16 +5,8 @@ sap.ui.define([
 
 	var MonstersCtrl = Controller.extend("be.fiddle.BusinessObjectModel.controller.Monsters", { });
 	
-	MonstersCtrl.prototype.onSync = function(oEvent){
-		var oMonsterModel = this.getView().getModel("monsters");
-		
-		oMonsterModel.sync(0,"monsters")
-		.then(function(){
-			debugger;
-		})
-		.catch(function(){
-			debugger;
-		});
+	MonstersCtrl.prototype.getNumberOfChangeRecords = function(oObject){
+		return (oObject.changeRecords && oObject.changeRecords.length) || 0;
 	};
 	
 	MonstersCtrl.prototype.onPressAdd = function(oEvent){
@@ -22,9 +14,17 @@ sap.ui.define([
 		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
 	};
 	
-	MonstersCtrl.prototype.onItemPress = function(oEvent){
+	MonstersCtrl.prototype.onPressItem = function(oEvent){
 		var oMonster = oEvent.getParameter("listItem").getBindingContext("monsters").getObject();
 		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
+	};
+
+	MonstersCtrl.prototype.onRouteMatched = function(oEvent, oData){
+		var sRoute = oEvent.getParameter("name");
+		
+		if(sRoute === "Monsters" || sRoute === "None" ){
+			//this.getView().getModel("monsters").refresh();
+		}
 	};
 	
 	return MonstersCtrl;

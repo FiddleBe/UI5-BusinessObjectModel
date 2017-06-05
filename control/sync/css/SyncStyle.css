@@ -1,4 +1,5 @@
 .fiddleSync{
-	min-width:380px;
-	width:100%;
+	min-width:40rem;
+	min-height:50rem;
+	display:flex;
 }

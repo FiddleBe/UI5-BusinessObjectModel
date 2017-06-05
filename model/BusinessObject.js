@@ -26,7 +26,12 @@ function (BaseObject) {
 		metadata:{
 			events:{
 				"propertyUpdated":{
-					parameters:[{name:"sPath"}]
+					parameters:[
+						{name:"path"},
+						{name:"reason"},
+						{name:"value"},
+						{name:"context",optional:"true"}
+						]
 				},
 				"saveRequested":{
 					parameters:[{name:"oObject"}]
@@ -71,6 +76,7 @@ function (BaseObject) {
     		bReuse = true;
     	}
     	
+    	//#TODO: what about deep properties? use getProperty and getPrevState?
         for (var key in this) {
             if (typeof this[key] !== "function" 			//do not include methods
             	&& BaseObject.prototype[key] === undefined  //don't include the properties of the superior object.
@@ -98,10 +104,10 @@ function (BaseObject) {
 		
 		var aChanges = [];
 		//process every record //reverse loop
-		var i = aChangeRecords.length;
+		var i = this.changeRecords.length;
 		while(i--){
-			if( aChangeRecords[i].timestamp >= dLastSync){
-				aChanges.push(aChangeRecords[i]);
+			if( this.changeRecords[i].timestamp >= dLastSync){
+				aChanges.push(this.changeRecords[i]);
 			}else{
 				break; //changes are already sorted in time, so if the date is before the last sync, stop searching
 			}
@@ -125,6 +131,16 @@ function (BaseObject) {
         return $.extend({}, oJSON,{} ); //make sure you return a copy, not a reference
     };
 
+	BusObj.prototype.getPreviousState = function(sPath){
+		try{
+			var oPrev = this.getProperty("/_oPrevState/" + sPath);
+			
+			return oPrev;
+		}catch (e){
+			return null;
+		}
+	};
+	
     BusObj.prototype.getProperty = function (sPath) {
         var aParts = sPath.split("/");
         var oProp = this;
@@ -221,13 +237,19 @@ function (BaseObject) {
     	if(sKey && sKey !== ""){
         	oObject[sKey] = vData;
         	
-            if(!bSkipAsChange){
-            	//update the current change record with the changes (or start a new changerecord if none is available)
-            	this.generateChangeRecord();
-            }
+            if(this.getPreviousState(sPath) !== vData ){
+	            if(!bSkipAsChange){
+	            	//update the current change record with the changes (or start a new changerecord if none is available)
+	            	this.generateChangeRecord();
+	            }
             
-            //fire an event to indicate that this property has updated
-			this.fireEvent("propertyUpdated", {sPath:sPath, value:vData});
+            	//fire an event to indicate that this property has updated
+				this.fireEvent("propertyUpdated", {
+					reason:sap.ui.model.ChangeReason.Binding,
+					path:sPath, 
+					value:vData}
+				);
+            }
 
             //and log
             jQuery.sap.log.debug("Property " + sPath + " updated with value " + vData );
@@ -282,8 +304,14 @@ function (BaseObject) {
 			this.changeRecords.push(oChangeRecord);
     	}
     	*/
-    	
 		this.changeRecords.push(oChangeRecord);
+
+	    //fire an event to indicate that this property has updated
+		this.fireEvent("propertyUpdated", {
+			reason:sap.ui.model.ChangeReason.Binding,
+			path:"changeRecords", 
+			value:this.changeRecords
+		});
 		return;
     }; //changerecords must always be sorted by timestamp (ascending)
 

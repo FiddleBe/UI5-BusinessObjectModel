@@ -9,7 +9,7 @@
 			height="100%">
 		<content>
 			<Table	items="{monsters>/entries}"
-					itemPress="onItemPress">
+					itemPress="onPressItem">
 				<columns>
 					<Column width="12em"><Text text="Id" /></Column>
 					<Column><Text text="Type" /></Column>
@@ -22,7 +22,7 @@
 							<ObjectIdentifier 	title="{monsters>name}"
 												text="{monsters>id}"/>
 							<Text text="{monsters>type}" />
-							<ObjectNumber	number="{= ${monsters>changeRecords}.length || 0 }"
+							<ObjectNumber	number="{ path:'monsters>', formatter:'.getNumberOfChangeRecords' }"
 											unit="changes" />
 						</cells>
 					</ColumnListItem>

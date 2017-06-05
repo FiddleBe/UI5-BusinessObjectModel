@@ -112,7 +112,7 @@ sap.ui.define([
         };//The context.getObject returns an instance of the template class, with the data loaded
         
         ObjectModel.prototype.getChangesSince = function(dLastSync){
-    		var i = (this.entries && this.entries.length ) || 0;
+    		var i = (this.oData.entries && this.oData.entries.length ) || 0;
     		var aChanges = [];
     		
     		if(!dLastSync){
@@ -120,7 +120,7 @@ sap.ui.define([
     		}
     		
     		while(i--){
-    			oBusobj = this.entries[i];
+    			var oBusobj = this.oData.entries[i];
     			if(oBusobj instanceof BusinessObject ){
     				aChanges = aChanges.concat(oBusobj.getChangesSince(dLastSync) );
     			}
@@ -600,6 +600,8 @@ sap.ui.define([
 		        	
         		fnUploadChunk();
 			}.bind(this) );
+			
+			return oPromise;
         }; //#TODO: what if a chunk fails? next may only start if previous finishes
 
         ObjectModel.prototype._createSyncProperties = function(oEvent){ 
@@ -706,10 +708,18 @@ sap.ui.define([
 			}
 		};
 		
-        ObjectModel.prototype.onPropertyUpdated = function(sPath, oValue){
-        	//debugger;
+        ObjectModel.prototype.onPropertyUpdated = function(oEvent){
+        	var sPath = oEvent.getParameter("path");
+        	var oValue = oEvent.getParameter("value");
+        	
         	//this.firePropertyChange({Reason:sap.ui.model.ChangeReason.Change, path:sPath, value:oValue});
-			this.refresh(); //refresh bindings (refine upto path?)
+        	/*this.firePropertyChange({
+        		reason:oEvent.getParameter("reason") || sap.ui.model.ChangeReason.Binding, 
+        		path:sPath || "/entries",
+        		value:oValue,
+        		context:oEvent.getParameter("context")
+        	});*/
+			this.refresh(true); //refresh bindings (refine upto path?)
         };//#TODO: optimize
         
         ObjectModel.ClassConstructor = function () {
