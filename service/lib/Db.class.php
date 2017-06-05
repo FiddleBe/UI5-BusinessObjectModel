@@ -17,20 +17,19 @@ class Db {
 			exit;
 		}
 		
-		$id 				= base64_encode( $id );
-		$entity				= base64_encode( $entity );
-		$changeIndicator 	= base64_encode( $changeIndicator );
-		$changeRecord 		= base64_encode( $changeRecord );
+		$dbId 				= base64_encode( $id );
+		$dbEntity			= base64_encode( $entity );
+		$dbChangeIndicator 	= base64_encode( $changeIndicator );
+		$dbChangeRecord 	= base64_encode( json_encode($changeRecord) );
 
-		$sql = 	"insert into `Monsters`.`entity` (id, timestamp, changeIndicator, changeRecord) " .
-				"VALUES ( $id, '$timestamp', $changeIndicator, $changeRecord)";
+		$sql = 	"insert into `Monsters`.`entity` (id, entity, timestamp, changeIndicator, changeRecord) " .
+				"VALUES ( '$dbId', '$dbEntity', '$timestamp', '$dbChangeIndicator', '$dbChangeRecord')";
 				
 		if( $mysql->query($sql) === true ){
 			$json='{ "id":"'.$id.'",'. 
 					'"entity":"'.$entity.'",'.
-					'"timestamp":"'.$timestamp.'",'. 
-					'"changeIndicator":'.$changeIndicator.',' .
-					'"changeRecords":'.$changeRecord.
+					'"changeIndicator":"'.$changeIndicator.'",' .
+					'"changeRecords":'.json_encode($changeRecord).
 					'}';
 		}else{
 			die("error: \n" . $mysql->error . ",\n SQL: \n" . $sql);

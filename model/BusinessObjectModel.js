@@ -490,7 +490,7 @@ sap.ui.define([
 						resolve({
 							"success":true, 
 							"data":{response:oData, count:aChunk.length, final:false}, 
-							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sName 
+							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sModelName 
 						});
 						
 				        //store sync properties
@@ -503,7 +503,7 @@ sap.ui.define([
 						resolve({
 							"success":true, 
 							"data":{response:aChunk, count:0, final:true}, 
-							"message": "all changes downloaded for model " + sName 
+							"message": "all changes downloaded for model " + sModelName 
 						});
 					}
 				}.bind(this) ;
@@ -551,7 +551,7 @@ sap.ui.define([
 
         	var oPromise = new Promise(function(resolve, reject) {
         		if(!(aChanges instanceof Array)){
-        			resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sName })
+        			resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sModelName })
         			return;
         		}
         		
@@ -561,7 +561,7 @@ sap.ui.define([
 						resolve({
 							"success":true, 
 							"data":{response:oData, count:1, final:false}, 
-							"message": "1 changedoc has been uploaded for model " + sName 
+							"message": "1 changedoc has been uploaded for model " + sModelName 
 						});
 						
 						fnUploadChunk()
@@ -569,7 +569,7 @@ sap.ui.define([
 						resolve({
 							"success":true, 
 							"data":{response:oData, count:1, final:true}, 
-							"message": "1 final changedoc has been uploaded for model " + sName 
+							"message": "1 final changedoc has been uploaded for model " + sModelName 
 						});
 					}
 	
@@ -594,7 +594,7 @@ sap.ui.define([
 					    contentType : "application/json",
 					    url : sUrl + "since=" + sSince,
 					    dataType : "json",
-					    data: oChangeDoc,
+					    data: JSON.stringify(oChangeDoc),
 					    async: true, 
 					    success : fnNewDataUploaded,
 					    error : fnUploadFailed
