@@ -168,7 +168,8 @@ sap.ui.define([
         };
         
         ObjectModel.prototype.create = function( sPath ){
-        	var oObject = new this.objectClass({id:jQuery.sap.uid()});
+        	var oObject = new this.objectClass({id:jQuery.sap.uid(), changeRecords:[] });
+        	oObject.generateChangeRecord("I");
         	
         	if(!sPath){
         		sPath = "/entries";
@@ -585,7 +586,7 @@ sap.ui.define([
 				}.bind(this) ;
 				
 				var fnUploadChunk = function(){
-		        	var oChangeDoc = aChanges.splice(1);
+		        	var oChangeDoc = aChanges.shift();
 					
 					//second, upload change document since last syncdate to server
 					jQuery.ajax({

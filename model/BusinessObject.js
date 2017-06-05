@@ -45,6 +45,7 @@ function (BaseObject) {
 
 			//process the base data
 			this.setProperty("/", oData, true);
+            this._bRemoved = false;
            
             //process the timeslices
             if(this.changeRecords){
@@ -63,7 +64,7 @@ function (BaseObject) {
     	else return false;
     };
     
-    BusObj.prototype.generateChangeRecord = function(){
+    BusObj.prototype.generateChangeRecord = function(sMode){
     	if(!this.changeRecords) return; //no changerecords provided by service, don't bother generating any.
     	
     	var oChangeRecord = this.changeRecords[this.changeRecords.length - 1] || {};
@@ -92,7 +93,7 @@ function (BaseObject) {
         
         if(oChangeRecord){
         	oChangeRecord.timestamp = new Date(); //since this is still a reference, in theory, the array should be updated now as well
-        	
+        	oChangeRecord.changeIndicator = sMode;
         	if(!bReuse){
 				this.addChangeRecord(oChangeRecord);
         	}
@@ -107,7 +108,13 @@ function (BaseObject) {
 		var i = this.changeRecords.length;
 		while(i--){
 			var oChange = this.changeRecords[i];
-			if( this.changeRecords[i].timestamp >= dLastSync){
+			
+			//remove private keys
+			for(var key in oChange){
+				if(key.startsWith("_")) delete oChange[key];
+			}
+			
+			if( oChange.timestamp >= dLastSync){
 				aChanges.push({id:this.id, timestamp:oChange.timestamp, changeIndicator:oChange.changeIndicator, changeRecord:oChange});
 			}else{
 				break; //changes are already sorted in time, so if the date is before the last sync, stop searching
@@ -321,6 +328,11 @@ function (BaseObject) {
 
 		//process every record
 		for(var i = 0; i < this.changeRecords.length; i++){
+			if(this.changeRecords[i].changeIndicator === "D"){
+				this._bRemoved = true;
+				break;
+			}
+			
 			for (var key in this.changeRecords[i] ) {
 				this.setProperty(key, this.changeRecords[i][key], true);
 			}
@@ -344,7 +356,14 @@ function (BaseObject) {
 	};
 
 	BusObj.prototype.save = function(){
-		this.generateChangeRecord();
+		if(!this._bRemoved){
+			this.generateChangeRecord("U");
+			this.fireEvent("saveRequested", {oObject:this}); //treated in the dbmodel
+		}
+	};
+
+	BusObj.prototype.delete = function(){
+		this.generateChangeRecord("D");
 		this.fireEvent("saveRequested", {oObject:this}); //treated in the dbmodel
 	};
 	
