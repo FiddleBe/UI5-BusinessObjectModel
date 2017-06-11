@@ -120,8 +120,8 @@ class Db {
 					'","entity":"'.base64_decode( $row[1]).
 					'","timestamp":"' . $timestamp . //this is btw the server timestamp
 					'","changeIndicator":"' . base64_decode( $row[3]).
-					'","changeRecords":'. base64_decode(  $row[4]).
-					'}';
+					'","changeRecords":['. base64_decode(  $row[4]).
+					']}';
 		} while($row);
 		
 		$result->close();		
