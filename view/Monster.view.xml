@@ -22,7 +22,7 @@
 		<footer>
 			<Toolbar>
 				<Button text="Save" icon="sap-icon://add" press="onPressSave" />
-				<Button text="Cancel" icon="sap-icon://add" press="onPressCancel" />
+				<Button text="Cancel" icon="sap-icon://cancel" press="onPressCancel" />
 			</Toolbar>
 		</footer>					
 	</Page>

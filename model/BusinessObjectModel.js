@@ -365,7 +365,7 @@ sap.ui.define([
 					for(var i = 0; i < aObjects.length; i++){
 						var oObject = aObjects[i];
 						var oProm = new Promise(function(putResolve, putReject){
-							var oData = oObject.getJSON();
+							var oData = (oObject.getJSON && oObject.getJSON()) || oObject;
 							
 							if(oObject.changeRecords && oObject.changeRecords.length > 0){
 								var oLastChange = oObject.changeRecords[oObject.changeRecords.length - 1];
@@ -426,7 +426,7 @@ sap.ui.define([
 			//use the settings stored previously
 			var sUrl = this.sUrl;
 			var dLastSync = dLastDownload  ||  this._dLastDownload ||  new Date(0)
-			var sSince = "" + dLastSync;
+			var sSince = "" + dLastSync.getTime();
 			
 			//prepare the url to receive parameters
 			if(sUrl.includes("?") ){
@@ -438,7 +438,7 @@ sap.ui.define([
         	var oProm = new Promise(function(resolve, reject){
 				//prepare a newDataDownloaded function
 				var fnNewDataDownloaded = function(oData){
-			        resolve({"success":true, "data":oData.count, "message":"number of changes:"});
+			        resolve({"success":true, "data":oData, "message":"number of changes:"});
 				}.bind(this) ;
 
 				//prepare a downloadFailed function
@@ -465,8 +465,6 @@ sap.ui.define([
         ObjectModel.prototype.downloadChanges = function( dLastDownload, sModelName ){ 
 			//use the settings stored previously
 			var sUrl = this.sUrl;
-			var dLastSync = dLastDownload  ||  this._dLastDownload ||  new Date(0)
-			var sSince = "" + dLastSync;
 			
 			//prepare the url to receive parameters
 			if(sUrl.includes("?") ){
@@ -483,19 +481,22 @@ sap.ui.define([
 						
 				        //store all your data in the database 
 				        //#TODO optimize this by only storing the changed objects: from the retrieved oData, loop and fetch every object by id.
-						var aEntries = this.getPropety("/entries");
+						var aEntries = this.getProperty("/entries");
 						this.saveDataToDb(aEntries); 
 						
 						//progress report
 						resolve({
 							"success":true, 
-							"data":{response:oData, count:aChunk.length, final:false}, 
+							"data":{response:aChunk, count:aChunk.length, final:false}, 
 							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sModelName 
 						});
 						
 				        //store sync properties
-				        var oLast = aChunk[aChunk.length];
-				        this._dLastdownload = oLast.timestamp;
+				        var oLast = aChunk[aChunk.length - 1];
+				        if(oLast.changeRecords && oLast.changeRecords.timestamp){
+				        	
+				        }
+				        this._dLastDownload = new Date( oLast.timestamp ); //keep the timestamp of the last downloaded record as new relevant download date
 						this.storeSyncProperties();
 						
 						fnDownloadChunk();
@@ -514,10 +515,11 @@ sap.ui.define([
 				}.bind(this) ;
 
 				var fnDownloadChunk = function(){
-					//first: get 10 changes arrived on the server since last syncdate in a delta-array
-					/*var oGetProm = this.loadData(sUrl, {"since": sSince }, true, "GET", true );*/
+					var dLastSync = dLastDownload  ||  this._dLastDownload ||  new Date(0)
+					var sSince = "" + dLastSync.getTime();
 					
-					var ogetProm = jQuery.get({
+					//first: get 10 changes arrived on the server since last syncdate in a delta-array
+					var oGetProm = jQuery.get({
 					    contentType : "application/json",
 					    url : sUrl + "since=" + sSince, //db service will only return 10 results at a time. (safety)
 						dataType : "json",
@@ -526,7 +528,7 @@ sap.ui.define([
 					});  
 					oGetProm.done(fnNewDataDownloaded.bind(this) );
 					oGetProm.fail(fnDownloadFailed.bind(this));
-				}
+				}.bind(this)
 				
 				fnDownloadChunk();
 				
@@ -539,7 +541,6 @@ sap.ui.define([
 			//use the settings stored previously
 			var sUrl = this.sUrl;
 			var dLastSync = dLastUpload  ||  this._dLastUpload ||  new Date(0)
-			var sSince = "" + dLastSync;
 			var aChanges = this.getChangesSince(dLastSync);
 			
 			//prepare the url to receive parameters
@@ -574,8 +575,7 @@ sap.ui.define([
 					}
 	
 			        //store sync properties
-			        var oLast = aChunk[aChunk.length];
-			        this._dLastUpload = oLast.timestamp;
+			        this._dLastUpload = new Date( oData.changeRecords.timestamp );
 					this.storeSyncProperties();
 					
 				}.bind(this) ;
@@ -592,7 +592,7 @@ sap.ui.define([
 					jQuery.ajax({
 					    type : "POST",
 					    contentType : "application/json",
-					    url : sUrl + "since=" + sSince,
+					    url : sUrl,
 					    dataType : "json",
 					    data: JSON.stringify(oChangeDoc),
 					    async: true, 
@@ -631,7 +631,7 @@ sap.ui.define([
 					
 					oGetStore.onsuccess = function(oEvent){
 						if(oEvent.target.result){
-							this._dLastDownload = oEvent.target.result._dLastDownload;
+							this._dLastDownload = oEvent.target.result.lastDownload;
 							this._dLastUpload = oEvent.target.result.lastUpload;
 						}else{
 							this._dLastDownload = new Date(0);
@@ -661,10 +661,7 @@ sap.ui.define([
 
         ObjectModel.prototype.storeSyncProperties = function(){
         	var oProm = new Promise(function(resolve, reject){
-        		if(! this._dLastSync ){
-        			this.d_lastSync = new Date(0);
-        		}
-        		
+
 				var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;// || window.shimIndexedDB;
 				if(!indexedDB){ reject( new Error("No indexed DB support"));}
 				
@@ -685,7 +682,7 @@ sap.ui.define([
 						"lastDownload":this._dLastDownload
 					};
 
-					var oPutStore = store.put(oData , oData.id); //or do I need to call, getJSON?
+					var oPutStore = store.put(oData ); //or do I need to call, getJSON?
 					
 					oPutStore.onsuccess = function(oEvent){
 				    	resolve(oEvent.target.result);
@@ -706,7 +703,7 @@ sap.ui.define([
 
 		ObjectModel.prototype.onSaveDateToDb = function(oEvent){
 			var oObject = oEvent.getParameter("oObject");
-			if(oObject)	{
+			if(oObject && oObject instanceof BusinessObject)	{
 				this.saveDataToDb([oObject]); //save
 			}
 		};
