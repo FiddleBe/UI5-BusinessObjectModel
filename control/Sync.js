@@ -98,7 +98,7 @@ sap.ui.define([
 					this.oPopover.setModel(this.getModel(sName),sName ); //all models must also be attached to the popover
 					
 					var aUpload = this.getModel(sName).getChangesSince();
-					aEntries.push( {
+					var oSyncEntry = {
 						"name":sName,
 						"uploadCollection":aUpload,
 						"toUpload":aUpload.length,
@@ -109,19 +109,19 @@ sap.ui.define([
 						"downloaded":0,
 						"downloading":false,
 						"lastDownload":this.getModel(sName).getLastDownload()
-					});
-					
-					//this isn't optimized, but i need the data in the model, asap.
-					this.getModel("sync").setProperty("/entries", aEntries);
+					}
+					aEntries.push( oSyncEntry );
 					
 					//wiat for the server to respond with a count of available downloads
 					this.getModel(sName).getDownloadableChangesCount()
 					.then(function(oMessage){
-						this.getModel("sync").setProperty("/entries/" + i + "/toDownload", oMessage.data ); //is the I here still the right value?
+						oSyncEntry.toDownload = oMessage.data.count ; 
+						this.getModel("sync").refresh(true);
 					}.bind(this));
 				}
 			}
-			
+
+			this.getModel("sync").setProperty("/entries", aEntries);
 	    };
 
 	    Sync.prototype.onOpenSync = function (oEvent) {
@@ -132,6 +132,7 @@ sap.ui.define([
 		Sync.prototype.setSyncModel = function(){
 			var oSyncModel = new sap.ui.model.json.JSONModel({entries:[]});
 			this.setModel(oSyncModel, "sync");
+			return oSyncModel;
 		};
 		
 		//sync styling

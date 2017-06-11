@@ -17,21 +17,22 @@ sap.ui.define([
     	var oSync = oCtx.getObject();
     	var sName = oCtx.getProperty("name");
     	var oModel = this.getView().getModel(sName);
+    	var oSyncModel = this.getView().getModel("sync");
     	
     	oSync.uploading = true;
     	
     	oModel.uploadChanges(null, sName)
     	.then(function(oResp){
-    		oSync.toUpload += (oResp.count * -1);
+    		oSync.uploaded += oResp.data.count;
     		
-    		if(oResp.final === true){
+    		if(oResp.data.final === true){
     			oSync.uploading = false;
     		}
-    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this))
     	.catch(function(oResp){
     		oSync.uploading = false;
-    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this));
     };
 
@@ -40,21 +41,22 @@ sap.ui.define([
     	var oSync = oCtx.getObject();
     	var sName = oCtx.getProperty("name");
     	var oModel = this.getView().getModel(sName);
+    	var oSyncModel = this.getView().getModel("sync");
     	
     	oSync.downloading = true;
     	
     	oModel.downloadChanges(null, sName)
     	.then(function(oResp){
-    		oSync.toDownload += (oResp.count * -1);
+    		oSync.downloaded += oResp.data.count ;
     		
-    		if(oResp.final === true){
+    		if(oResp.data.final === true){
     			oSync.downloading = false;
     		}
-    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this))
     	.catch(function(oResp){
     		oSync.downloading = false;
-    		oModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this));
     };
 	  

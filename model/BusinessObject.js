@@ -114,7 +114,7 @@ function (BaseObject) {
 				if(key.startsWith("_")) delete oChange[key];
 			}
 			
-			if( oChange.timestamp >= dLastSync){
+			if( oChange.timestamp > dLastSync){
 				aChanges.push({id:this.id, timestamp:oChange.timestamp, changeIndicator:oChange.changeIndicator, changeRecord:oChange});
 			}else{
 				break; //changes are already sorted in time, so if the date is before the last sync, stop searching
