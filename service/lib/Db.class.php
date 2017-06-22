@@ -41,7 +41,11 @@ class Db {
 	
 	public function getEntitySince($entity, $timestamp , $user, $pass){
 		if($timestamp){
+<<<<<<< HEAD
 			$timestamp =  substr("$timestamp", 0, 10) ; //apparently w3C timestamp is not recognized by mysql...
+=======
+			$timestamp = strtotime($timestamp/1000); //apparently w3C timestamp is not recognized by mysql...
+>>>>>>> 801ed6174e657063338928841db15cf13e2b0461
 		}
 		if(!$timestamp){
 			$date = new DateTime("1970-01-01");
@@ -54,10 +58,13 @@ class Db {
 		return $monsters;
 	}
 
-	
 	public function getChangesCount($entity, $timestamp , $user, $pass){
 		if($timestamp){
+<<<<<<< HEAD
 			$timestamp =  substr("$timestamp", 0, 10) ; //apparently w3C timestamp is not recognized by mysql...
+=======
+			$timestamp = strtotime($timestamp/1000); //apparently w3C timestamp is not recognized by mysql...
+>>>>>>> 801ed6174e657063338928841db15cf13e2b0461
 		}
 		if(!$timestamp){
 			$date = new DateTime("1970-01-01");
@@ -120,8 +127,13 @@ class Db {
 					'","entity":"'.base64_decode( $row[1]).
 					'","timestamp":"' . $timestamp . //this is btw the server timestamp
 					'","changeIndicator":"' . base64_decode( $row[3]).
+<<<<<<< HEAD
 					'","changeRecords":['. base64_decode(  $row[4]).
 					']}';
+=======
+					'","changeRecords":'. base64_decode(  $row[4]).
+					'}';
+>>>>>>> 801ed6174e657063338928841db15cf13e2b0461
 		} while($row);
 		
 		$result->close();		
