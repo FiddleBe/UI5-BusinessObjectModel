@@ -12,6 +12,10 @@ sap.ui.define([
 */
     };
     
+    SyncView.prototype.onClose = function (oEvent) {
+    	be.fiddle.lib.model.offline.Sync.oPopover.close(); //#TODO, make this architecturally nicer
+    };
+    
     SyncView.prototype.onUploadPress = function(oEvent){
     	var oCtx = oEvent.getSource().getBindingContext("sync");
     	var oSync = oCtx.getObject();

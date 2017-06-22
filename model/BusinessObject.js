@@ -355,6 +355,10 @@ function (BaseObject) {
 		this.detachEvent("saveRequested", fnHandler, oListener)	;
 	};
 
+	BusObj.prototype.toString=function(){
+		return JSON.stringify(this.getJSON() );
+	}
+	
 	BusObj.prototype.save = function(){
 		if(!this._bRemoved){
 			this.generateChangeRecord("U");

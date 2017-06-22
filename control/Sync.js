@@ -60,8 +60,8 @@ sap.ui.define([
 	    });
 	    
 		Sync.prototype.destroy = function(){
-			if(this.oPopover){
-				this.oPopover.destroy();
+			if(be.fiddle.lib.model.offline.Sync.oPopover){
+				be.fiddle.lib.model.offline.Sync.oPopover.destroy();
 			}
 			Button.prototype.destroy.apply(this,arguments);
 		}
@@ -77,9 +77,9 @@ sap.ui.define([
 	        this.setSyncModel();
 	        
 	        if(!this.oPopover){
-				this.oPopover = sap.ui.xmlfragment("be.fiddle.lib.model.offline.sync.fragment.Sync");
-				this.oPopover.setModel(this.getModel("i18n"), "i18n");
-				this.oPopover.setModel(this.getModel("sync"), "sync");
+				be.fiddle.lib.model.offline.Sync.oPopover = sap.ui.xmlfragment("be.fiddle.lib.model.offline.sync.fragment.Sync");
+				be.fiddle.lib.model.offline.Sync.oPopover.setModel(this.getModel("i18n"), "i18n");
+				be.fiddle.lib.model.offline.Sync.oPopover.setModel(this.getModel("sync"), "sync");
 	    	}
 
 	        this.attachPress(this.onOpenSync.bind(this));
@@ -95,7 +95,7 @@ sap.ui.define([
 				var sName = aModelNames[i];
 				if(this.getModel(sName) instanceof BusinessObjectModel){
 					
-					this.oPopover.setModel(this.getModel(sName),sName ); //all models must also be attached to the popover
+					be.fiddle.lib.model.offline.Sync.oPopover.setModel(this.getModel(sName),sName ); //all models must also be attached to the popover
 					
 					var aUpload = this.getModel(sName).getChangesSince();
 					var oSyncEntry = {
@@ -126,7 +126,7 @@ sap.ui.define([
 
 	    Sync.prototype.onOpenSync = function (oEvent) {
 	    	this.onModelUpdate(); //#TODO I don't like it that we have to call this here. I would have preferred that the onModelUpdate were an event handler after model changes
-			this.oPopover.openBy(oEvent.getSource() );
+			be.fiddle.lib.model.offline.Sync.oPopover.open(oEvent.getSource() );
 	    };//open a popover with the sync options and buttons
 
 		Sync.prototype.setSyncModel = function(){

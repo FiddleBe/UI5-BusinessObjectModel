@@ -3,7 +3,7 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:core="sap.ui.core"
 	class="sapUiNoMargin">
-	<ResponsivePopover
+	<Dialog
 		class="sapUiPopupWithoutPadding sapUiNoMargin"
 		placement="Auto"
 		showHeader="false" 
@@ -17,5 +17,5 @@
 				</pages>
 			</NavContainer>
 		</content>
-	</ResponsivePopover>
+	</Dialog>
 </core:FragmentDefinition>

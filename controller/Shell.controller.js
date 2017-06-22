@@ -9,6 +9,11 @@ sap.ui.define([
 		}
 	});
 	
+	ShellCtrl.prototype.onAfterRendering = function(oEvent){
+		var oToolPage = this.getView().byId("monsterShell");
+		oToolPage.setSideExpanded( false );		
+	};
+
 	ShellCtrl.prototype.onToggleMenu = function(oEvent){
 		var oToolPage = this.getView().byId("monsterShell");
 		oToolPage.setSideExpanded( oEvent.getSource().getPressed() );		

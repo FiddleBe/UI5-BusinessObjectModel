@@ -18,7 +18,7 @@
 				<columns>
 					<Column class="sapUiSmallMarginEnd" width="8rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.entity}"/></Column>
 					<Column class="sapUiSmallMarginEnd" width="12rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.lastSync}" /></Column>
-					<Column class="sapUiSmallMarginEnd" width="20rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.progress}"/></Column>
+					<Column class="sapUiSmallMarginEnd" width="100%"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.progress}"/></Column>
 				</columns>
 				
 				<items>
@@ -51,7 +51,7 @@
 													displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgressDisplay'}"
 													showValue="true"
 													state="None" 
-													width="18rem"/>
+													width="100%"/>
 								<Button	icon="sap-icon://upload-to-cloud"
 										size="2rem"
 										class="sapUiNoMargin"
@@ -66,7 +66,7 @@
 													displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgressDisplay'}"
 													showValue="true"
 													state="None" 
-													width="18rem" />
+													width="100%" />
 								<Button	icon="sap-icon://download-from-cloud"
 										size="2rem"
 										class="sapUiNoMargin"
@@ -83,6 +83,7 @@
 			<Toolbar>
 				<ToolbarSpacer/>
 				<Button text="{i18n>be.fiddle.lib.model.offline.Sync.sync}" press="onSync" />
+				<Button text="{i18n>be.fiddle.lib.model.offline.Sync.close}" press="onClose" />
 			</Toolbar>
 		</footer>
 	</Page>		

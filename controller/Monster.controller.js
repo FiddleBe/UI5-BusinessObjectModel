@@ -21,7 +21,7 @@ sap.ui.define([
 			while(i--){
 				if(aMonsters[i].id === oParam.id){
 					this.getView().bindElement({path:"/entries/" + i, model:"monsters"});
-					this.setViewModel();
+					//this.setViewModel();
 					return;
 				}
 			}
@@ -80,6 +80,18 @@ sap.ui.define([
 			var aPairs = oMonster.getPropertyPairs();
 			this.getView().setModel(new sap.ui.model.json.JSONModel(aPairs),"pairs");
 		}
+	};
+	
+	MonsterCtrl.prototype.getObjectAsJSON = function(oObject){
+		return JSON.stringify(oObject);
+	};
+	
+	MonsterCtrl.prototype.onFileSelected = function(oEvent){
+		debugger;	
+	};
+
+	MonsterCtrl.prototype.onUploadCompleted = function(oEvent){
+		debugger;	
 	};
 	
 	return MonsterCtrl;
