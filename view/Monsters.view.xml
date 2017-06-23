@@ -11,9 +11,9 @@
 			<Table	items="{monsters>/entries}"
 					itemPress="onPressItem">
 				<columns>
-					<Column width="12em"><Text text="Id" /></Column>
-					<Column><Text text="Type" /></Column>
-					<Column><Text text="Changes" /></Column>
+					<Column class="fiddleDark" width="12em"><Text text="Id" /></Column>
+					<Column class="fiddleDark"><Text text="Type" /></Column>
+					<Column class="fiddleDark"><Text text="Changes" /></Column>
 				</columns>
 
 				<items>
@@ -32,7 +32,17 @@
 			
 		<footer>
 			<Toolbar>
-				<Button text="Add" icon="sap-icon://add" press="onPressAdd" />
+				<MenuButton text="Add" icon="sap-icon://add" >
+					<menu>
+		                <Menu itemSelected="onPressAdd">
+		                    <items>
+		                        <MenuItem text="Dragon"  enabled="true"	key="Dragon"/>
+		                        <MenuItem text="Vampire" enabled="false"/>
+		                        <MenuItem text="Ogre"	 enabled="false"/>
+		                    </items>
+		                </Menu>
+		            </menu>					
+				</MenuButton>
 			</Toolbar>
 		</footer>					
 	</Page>

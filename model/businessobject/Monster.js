@@ -18,13 +18,29 @@ sap.ui.define([
 		BusinessObject.prototype.save.apply(this, arguments);
 	};
 
-	Monster.prototype.delete = function(){
-		
+	Monster.prototype.setPicture = function(sDataUrl){
+		this.setProperty("picture",sDataUrl);
 	};
 
+    //static constructor
+    Monster.ClassConstructor = function () {
+		sap.ui.require(["be/fiddle/BusinessObjectModel/model/businessobject/monster/Dragon"],
+		function(Dragon){
+			//nothing special here, just making sure we load our child-definitions
+		});
+    };
+    
     Monster.getObject = function(oData){
-    	return new Monster(oData);
+    	switch(oData.type){
+    		case "Dragon":
+    			return be.fiddle.BusinessObjectModel.model.businessobject.monster.Dragon.getObject(oData);
+    		default:
+		    	return new Monster(oData);
+    	}
     };//factory to get the right child object
+
+    //statically call the class constructor
+    setTimeout( Monster.ClassConstructor, 0); //to prevent the constructor from running before the BusinessObject is defined
 
 	return Monster;
 });

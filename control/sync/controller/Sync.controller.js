@@ -8,8 +8,16 @@ sap.ui.define([
 	});
 	
     SyncView.prototype.onSync = function (oEvent) {
-/*	    this.fireSort({ aSync: this.getModel(this.sModel).getProperty(this.sPath) } );
-*/
+    	var aSync = this.getView().getModel("sync").getProperty("/entries");
+    	
+		//for every model
+		aSync.forEach(function(oSync){
+			var oModel = this.getView().getModel(oSync.sName);
+			//sync
+			if(oModel){
+				oModel.sync();
+			}
+		}.bind(this));
     };
     
     SyncView.prototype.onClose = function (oEvent) {

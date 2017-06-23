@@ -85,13 +85,13 @@ function (BaseObject) {
             	&& key !== "mEventRegistry"					//don't include the internal previous state
             	&& !( this[key] instanceof Array )			//avoind including changerecords in the changerecord...
             ) {
-                if(this[key] !== this._oPrevState[key]){
+                if(sMode === 'I' || this[key] !== this._oPrevState[key]){
                 	oChangeRecord[key] = this[key];
                 }
             }
         }
         
-        if(oChangeRecord){
+        if(Object.keys(oChangeRecord).length > 0){ //if we actually have any changes...
         	oChangeRecord.timestamp = new Date(); //since this is still a reference, in theory, the array should be updated now as well
         	oChangeRecord.changeIndicator = sMode;
         	if(!bReuse){

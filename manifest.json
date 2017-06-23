@@ -10,6 +10,7 @@
 		},
 		"title": "{{appTitle}}",
 		"description": "{{appDescription}}",
+		"offline":true,
 		"dataSources": {
 			"monsters": {
 				"uri": "/service/db.php?entity=monsters",
@@ -18,8 +19,7 @@
 					"annotations": []
 				}
 			}
-		},
-		"offline":true
+		}
 	},
 	"sap.ui": {
 		"_version": "1.1.0",
@@ -59,12 +59,6 @@
 			"cozy": true
 		},
 		"models": {
-			"i18n": {
-				"type": "sap.ui.model.resource.ResourceModel",
-				"settings": {
-					"bundleName": "be.fiddle.BusinessObjectModel.i18n.i18n"
-				}
-			},
 			"monsters": {
 				"type": "be.fiddle.BusinessObjectModel.model.BusinessObjectModel",
 				"dataSource": "monsters",
@@ -77,10 +71,16 @@
 						"sap-documentation": "heading"
 					}
 				}
+			},
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "be.fiddle.BusinessObjectModel.i18n.i18n"
+				}
 			}
 		},
 		"resources": {
-			"css": []
+			"css": [{"uri":"css/style.css"}]
 		},
 		"routing": {
 			"config": {
@@ -107,9 +107,9 @@
 					"viewName": "Monsters",
 					"viewId": "Monsters"
 				},
-				"Monster": {
-					"viewName": "Monster",
-					"viewId": "Monster"
+				"Dragon": {
+					"viewName": "Dragon",
+					"viewId": "Dragon"
 				}
 			},
 			"routes": [{
@@ -123,10 +123,10 @@
 				"greedy": false,
 				"target": ["Monsters"]
 			}, {
-				"name": "Monster",
-				"pattern": "Monsters/{id}",
+				"name": "Dragon",
+				"pattern": "Dragon/{id}",
 				"greedy": false,
-				"target": ["Monster"]
+				"target": ["Dragon"]
 			}, {
 				"name": "Notfound",
 				"pattern": ":all*:",

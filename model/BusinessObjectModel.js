@@ -167,21 +167,21 @@ sap.ui.define([
       		return false;
         };
         
-        ObjectModel.prototype.create = function( sPath ){
-        	var oObject = new this.objectClass({id:jQuery.sap.uid(), changeRecords:[] });
+        ObjectModel.prototype.create = function(  oJson ){
+        	if(!oJson.id){
+        		oJson.id = jQuery.sap.uid();
+        	}
+        	if(!(oJson.changeRecords instanceof Array)){
+        		oJson.changeRecords = [];
+        	}
+        	
+        	var oObject = this.objectClass.getObject(oJson);
         	oObject.generateChangeRecord("I");
         	
-        	if(!sPath){
-        		sPath = "/entries";
-        	}
-
-			if(sPath === "/entries" ){
-	            oObject = this.addObject(sPath, oObject);
-	            oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
-	            return oObject;
-			}
-			
-			throw "can only perform create on path /entries";
+        	var sPath = "/entries";
+            oObject = this.addObject(sPath, oObject);
+            oObject.attachPropertyUpdated(null, this.onPropertyUpdated, this);
+            return oObject;
         };
 
         ObjectModel.prototype.addObject = function (sPath, oObject) {
@@ -300,6 +300,8 @@ sap.ui.define([
 
             arguments[0] = this.oData; //fool javascript into using the prepared array.
             Model.prototype.setData.apply(this,arguments); //trigger the superior model implementation
+            
+            this._bDataLoaded = true;
         };//redefine setData, make it so that it convers every entry into an object before adding into the collection
         
         ObjectModel.prototype.getDataFromDb = function(oSettings){ 
@@ -419,7 +421,7 @@ sap.ui.define([
         	aPromises.push(this.uploadchanges(this._dLastUpload, sModelName));
         	aPromises.push(this.downloadchanges(this._dLastdownload, sModelName));
 			
-			return oPromise;
+			//return oPromise;
         };//sync your DB content with the server content
 
         ObjectModel.prototype.getDownloadableChangesCount = function( dLastDownload, sModelName ){ 
@@ -701,6 +703,22 @@ sap.ui.define([
 			return oProm;
         };//store the sync properties
 
+		ObjectModel.prototype.onDataLoaded = function(){
+			var oProm = new Promise(function(resolve,reject){
+				var fnDataLoaded = function(){
+					if(this._bDataLoaded){
+						resolve();
+					}else{
+						setTimeout(fnDataLoaded.bind(this), 50);
+					}
+				}.bind(this)
+				
+				fnDataLoaded();
+			}.bind(this));
+			
+			return oProm;
+		};
+		
 		ObjectModel.prototype.onSaveDateToDb = function(oEvent){
 			var oObject = oEvent.getParameter("oObject");
 			if(oObject && oObject instanceof BusinessObject)	{

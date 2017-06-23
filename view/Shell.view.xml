@@ -33,10 +33,11 @@
 		
 		<sideContent>
 			<SideNavigation	expanded="false"
+							class="fiddleDark"
 							itemSelect="onNavPress">
 				<NavigationList>
 					<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.monsters}"
-										icon="sap-icon://person-placeholder"
+										icon="sap-icon://lab"
 										enabled="true"
 										expanded="true"
 										key="Monsters">

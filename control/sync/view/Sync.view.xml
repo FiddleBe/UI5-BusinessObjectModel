@@ -1,5 +1,6 @@
 <mvc:View	controllerName="be.fiddle.lib.model.offline.sync.controller.Sync" 
 			xmlns="sap.m"
+			xmlns:f="sap.ui.layout.form" 
 			xmlns:mvc="sap.ui.core.mvc" 
 			xmlns:core="sap.ui.core" 
 			xmlns:html="http://www.w3.org/1999/xhtml">
@@ -8,75 +9,70 @@
 			<Toolbar>
 				<ToolbarSpacer/>
 				<Label	text="{i18n>be.fiddle.lib.model.offline.Sync.auto}"/>
-				<Switch state="{sync>/auto}"/>
+				<Switch state="{sync>/auto}" enabled="false"/>
 			</Toolbar>
 		</customHeader>
 
 		<content>
-			<Table	items="{sync>/entries}" 
-					class="fiddleSync sapUiNoMargin">
-				<columns>
-					<Column class="sapUiSmallMarginEnd" width="8rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.entity}"/></Column>
-					<Column class="sapUiSmallMarginEnd" width="12rem"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.lastSync}" /></Column>
-					<Column class="sapUiSmallMarginEnd" width="100%"><Text text="{i18n>be.fiddle.lib.model.offline.Sync.progress}"/></Column>
-				</columns>
+			<VBox	items="{sync>/entries}" 
+					class="sapUiNoMargin">
 				
-				<items>
-					<ColumnListItem vAlign="Middle">
-						<Label text="{sync>name}"/>
-
-						<VBox templateShareable="false">
-							<Text class="sapUiSmallMargin" text="{
-								path:'sync>lastUpload', 
-								type:'sap.ui.model.type.Date', 
-								formatOptions: {
-									style: 'full'
-								}
-							}" />
-							
-							<Text class="sapUiSmallMargin" text="{
-								path:'sync>lastDownload', 
-								type:'sap.ui.model.type.Date', 
-								formatOptions: {
-									style: 'full'
-								}
-							}" />
-						</VBox>
+				<f:SimpleForm	class="fiddleBlock"
+								maxContainerCols="1"
+								layout="ResponsiveGridLayout"
+								title="{sync>name}" 
+								labelSpanL="4"
+								labelSpanM="4"
+								emptySpanL="0"
+								emptySpanM="0"
+								columnsL="2"
+								columnsM="2">
+					<f:content>	
+						<HBox	alignItems="Center" 
+								alignContent="Stretch">
+							<Text	class="sapUiSmallMargin" 
+									width="5rem"
+									text="{
+										path:'sync>lastUpload', 
+										type:'sap.ui.model.type.Date', 
+										formatOptions: { pattern: 'dd/MMM/yyyy' }
+									}" />
+							<ProgressIndicator	class="sapUiSmallMarginEnd"
+												percentValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgress'}"
+												displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgressDisplay'}"
+												showValue="true"
+												state="None" 
+												width="10rem"/>
+							<Button	icon="sap-icon://upload-to-cloud"
+									size="2rem"
+									class="sapUiNoMargin"
+									press="onUploadPress"
+									enabled="{= !${sync>uploading} }"/>
+						</HBox>
 						
-						<VBox templateShareable="false">
-							<!--Upload-->
-							<HBox alignItems="Center" alignContent="Stretch">
-								<ProgressIndicator	class="sapUiSmallMarginEnd"
-													percentValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgress'}"
-													displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgressDisplay'}"
-													showValue="true"
-													state="None" 
-													width="100%"/>
-								<Button	icon="sap-icon://upload-to-cloud"
-										size="2rem"
-										class="sapUiNoMargin"
-										press="onUploadPress"
-										enabled="{= !${sync>uploading} }"/>
-							</HBox>
-							
-							<!--Download-->
-							<HBox alignItems="Center" alignContent="Stretch">
-								<ProgressIndicator	class="sapUiSmallMarginEnd"
-													percentValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgress'}"
-													displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgressDisplay'}"
-													showValue="true"
-													state="None" 
-													width="100%" />
-								<Button	icon="sap-icon://download-from-cloud"
-										size="2rem"
-										class="sapUiNoMargin"
-										press="onDownloadPress"
-										enabled="{= !${sync>downloading} }"/>
-							</HBox>
-						</VBox>						
-					</ColumnListItem>
-				</items>
-			</Table>
+						<HBox alignItems="Center" alignContent="Stretch">
+							<Text	class="sapUiSmallMargin" 
+									width="5rem"
+									text="{
+										path:'sync>lastDownload', 
+										type:'sap.ui.model.type.Date', 
+										formatOptions: { pattern: 'dd/MMM/yyyy' }
+									}" />
+							<ProgressIndicator	class="sapUiSmallMarginEnd"
+												percentValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgress'}"
+												displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgressDisplay'}"
+												showValue="true"
+												state="None" 
+												width="10rem" />
+							<Button	icon="sap-icon://download-from-cloud"
+									size="2rem"
+									class="sapUiNoMargin"
+									press="onDownloadPress"
+									enabled="{= !${sync>downloading} }"/>
+						</HBox>
+					</f:content>
+				</f:SimpleForm>
+			</VBox>
 		</content>
 		
 		<footer>

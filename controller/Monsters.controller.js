@@ -10,13 +10,20 @@ sap.ui.define([
 	};
 	
 	MonstersCtrl.prototype.onPressAdd = function(oEvent){
-		var oMonster = this.getView().getModel("monsters").create();
-		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
+		var oItem = oEvent.getParameter("item");
+		if (oItem.getKey() === "Dragon"){
+			this.addDragon();
+		}
+	};
+
+	MonstersCtrl.prototype.addDragon = function(){
+		var oDragon = this.getView().getModel("monsters").create( {"type":"Dragon" });
+		this.getOwnerComponent().getRouter().navTo("Dragon", {"id":oDragon.id });
 	};
 	
 	MonstersCtrl.prototype.onPressItem = function(oEvent){
 		var oMonster = oEvent.getParameter("listItem").getBindingContext("monsters").getObject();
-		this.getOwnerComponent().getRouter().navTo("Monster", {"id":oMonster.id});
+		this.getOwnerComponent().getRouter().navTo("Dragon", {"id":oMonster.id});
 	};
 
 	MonstersCtrl.prototype.onRouteMatched = function(oEvent, oData){

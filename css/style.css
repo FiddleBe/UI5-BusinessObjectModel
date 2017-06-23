@@ -1,0 +1,15 @@
+.fiddleForm{
+	background-color:rgba(255,255,255,0.6);
+	padding:1rem;
+}
+
+.sapMShellGlobalInnerBackground{ /*little hack of the standard background color in a shell*/
+	background-color:rgba(255,255,255,0.0) !important;
+	
+}
+
+.fiddleDark, .sapMListTbl th, th > span{
+	background-color:#2f3c48 !important;
+	border-style:none !important;
+	color:rgb(240,240,240) !important;
+}

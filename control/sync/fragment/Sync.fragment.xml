@@ -9,7 +9,7 @@
 		showHeader="false" 
 		resizable="false"
 		contentHeight="100%"
-		contentWidth="100%">
+		contentWidth="30rem">
 		<content>
 			<NavContainer class="sapUiNoMargin">
 				<pages>

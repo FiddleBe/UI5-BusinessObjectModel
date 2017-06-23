@@ -1,5 +1,10 @@
 .fiddleSync{
-	min-width:40rem;
+	min-width:24rem;
 	min-height:50rem;
 	display:flex;
+}
+
+.fiddleBlock {
+	border-top:1px solid #475b6d;
+	border-bottom:1px solid #475b6d;
 }
