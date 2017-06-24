@@ -91,7 +91,9 @@ sap.ui.define([
 	};
 
 	DragonCtrl.prototype.onShowHistory = function(oEvent){
-		this.getView().byId("dragonDetail").toggle(  );
+		var oDyn = this.getView().byId("dragonDetail");
+		oDyn.setShowSideContent(!oDyn.getShowSideContent());
+		//this.getView().byId("dragonDetail").toggle(  );
 	};
 	
 	return DragonCtrl;

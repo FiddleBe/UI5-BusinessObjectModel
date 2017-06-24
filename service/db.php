@@ -15,7 +15,7 @@ $input = json_decode($input,true);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $user="monster_doctor"; //defaulted to generic user with limited rights
-$pass="bE}3s2TNVsA;"; //defaulted to generic user with limited rights
+$pass="ILoveSAP;"; //defaulted to generic user with limited rights
 
 $id = 0;
 $timestamp = $_GET["since"];
@@ -47,6 +47,8 @@ switch ($method) { //CR based database with NoSQL
 
 		if(isset( $_GET["count"] ) ){
 			echo $db->getChangesCount($entity, $timestamp, $user, $pass);
+		}else if(isset( $_GET["logon"] ) && isset( $_SESSION["USER"] ) && isset( $_SESSION["PASS"] ) ){
+			echo $db->getChangesCount($entity, $timestamp, $_SESSION["USER"], $_SESSION["PASS"]);
 		}else{
 			echo  $db->getEntitySince($entity, $timestamp, $user, $pass ) ; //pretty simple, just load everything. filter on frontend						
 		}
@@ -59,7 +61,11 @@ switch ($method) { //CR based database with NoSQL
 		if(isset( $input["changeIndicator"] ) ) $changeIndicator 	= $input["changeIndicator"];
 		if(isset( $input["changeRecord"] ) ) 	$changeRecord		= $input["changeRecord"];
 
-		echo $db->addEntity( $id, $entity, $changeIndicator, $changeRecord, $user, $pass ); 
+		if(isset( $_SESSION["USER"] ) && isset( $_SESSION["PASS"] ) ){
+			echo $db->addEntity( $id, $entity, $changeIndicator, $changeRecord, $_SESSION["USER"], $_SESSION["PASS"] ); 
+		}else{
+			die("not authorized");
+		}
 		break;
 }
 ?>

@@ -1,0 +1,16 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<ResponsivePopover
+		title="Logon"
+		class="sapUiPopupWithPadding"
+		placement="Right" >
+		<endButton>
+			<Button text="Login" press="onLogon" />
+		</endButton>
+		<content>
+			<Input id="inpUser" value="" submit="onLogin" placeholder="user name"/>
+			<Input id="inpPass" value="" submit="onLogin" placeholder="password" type="Password"/>
+		</content>
+	</ResponsivePopover>
+</core:FragmentDefinition>

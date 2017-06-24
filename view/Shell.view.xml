@@ -26,6 +26,7 @@
 		            </m:layoutData>
 		        </m:Text>	
 				<m:ToolbarSpacer/>
+				
    				<fiddle:Sync text="Sync" icon="sap-icon://synchronize" />
 
 			</ToolHeader>
@@ -49,6 +50,9 @@
 				
 				<fixedItem>
 					<NavigationList>
+						<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.login}"
+											key="Login"
+											icon="sap-icon://log" />
 						<NavigationListItem text="{i18n>be.fiddle.BusinessObjectModel.shell.about}"
 											key="About"
 											icon="sap-icon://sys-help" />

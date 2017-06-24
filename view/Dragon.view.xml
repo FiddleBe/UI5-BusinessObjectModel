@@ -23,33 +23,46 @@
 		<l:DynamicSideContent
 			id="dragonDetail"
 			class="sapUiContentPadding"
-			sideContentFallDown="BelowM"
+			showSideContent="false"
 			containerQuery="true"
 			breakpointChanged="updateToggleButtonState">
 			<l:mainContent>	
-				<VBox width="24rem" class="fiddleForm">
-					<HBox alignItems="Center">
-						<Label text="Name" width="7rem"/>
+				<f:SimpleForm	class="fiddleForm"
+								maxContainerCols="2"
+								layout="ResponsiveGridLayout"
+								title="{monsters>name}" 
+								adjustLabelSpan="false"
+								labelSpanXL="5"
+								labelSpanL="5"
+								labelSpanM="5"
+								labelSpanS="12"
+								emptySpanXL="1"
+								emptySpanL="1"
+								emptySpanM="1"
+								emptySpanS="0"
+								columnsXL="2"
+								columnsL="2"
+								columnsM="1"
+								columnsS="1"
+								width="100%">
+					<f:content>	
+
+						<Label text="Name"/>
 						<Input value="{monsters>name}" width="15rem"/>
-					</HBox>
-					<HBox alignItems="Center">
-						<Label text="Id" width="7rem"/>
+
+						<Label text="Id"/>
 						<Input value="{monsters>id}" width="15rem" enabled="false"/>
-					</HBox>
-					<HBox alignItems="Center">
-						<Label text="Type" width="7rem"/>
+
+						<Label text="Type"/>
 						<Input value="{monsters>type}" width="15rem" enabled="false"/>
-					</HBox>
-					<HBox alignItems="Center">
-						<Label text="Special Ability" width="7rem"/>
+
+						<Label text="Special Ability"/>
 						<TextArea value="{monsters>specialAbility}" width="15rem" height="5rem"/>
-					</HBox>
-					<HBox alignItems="Center">
-						<Label text="Add last sighting" width="7rem"/>
+
+						<Label text="Add last sighting"/>
 						<Button src="sap-icon://map" text="Last seen here!" press="onLastSeenPress"  width="15rem"/>
-					</HBox>
-					<HBox alignItems="Center">
-						<Label text="Picture" width="7rem"/>
+
+						<Label text="Picture"/>
 						<u:FileUploader	value="{= ${monsters>pictureUrl} || 'none' }"
 										sendXHR="true"
 										buttonOnly="true"
@@ -57,11 +70,11 @@
 										uploadComplete="onUploadComplete"
 										change="onFileSelected"
 										width="15rem"/>
-					</HBox>
-					<HBox>
+						
+						<core:Title text="Picture" />
 						<Image src="{monsters>picture}" width="22rem" />
-					</HBox>
-				</VBox>
+					</f:content>	
+				</f:SimpleForm>
 			</l:mainContent>
 			<l:sideContent>
 				<List	width="24rem"
