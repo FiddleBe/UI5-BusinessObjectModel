@@ -269,6 +269,9 @@ function (BaseObject) {
     	
 		//sort the change records by timestamps
 		this.changeRecords.sort(function(a,b){ 
+			if(!(a.timestamp instanceof Date) )	a.timestamp = new Date(a.timestamp);
+			if(!(b.timestamp instanceof Date) )	b.timestamp = new Date(b.timestamp);
+
 			if(a.timestamp < b.timestamp){
 				return -1;
 			}
@@ -294,11 +297,15 @@ function (BaseObject) {
     }; //changerecords must always be sorted by timestamp (ascending)
 
     BusObj.prototype.addChangeRecord = function(oChangeRecord){
+    	var bAlreadyExists = false;
+    	
     	if(!this.changeRecords){
     		this.changeRecords = [];
 		}
+    	if(!(oChangeRecord.timestamp instanceof Date)){
+    		oChangeRecord.timestamp = new Date(oChangeRecord.timestamp);
+    	}
     	
-    	/* can't quite remember the idea behind this logic. I think it was to avoid duplicate changerecords
     	for(var i = 0; i<this.changeRecords.length; i++){
     		var oRecord = this.changeRecords[i];
     		if(oRecord.timestamp === oChangeRecord.timestamp ){
@@ -306,20 +313,23 @@ function (BaseObject) {
     			//theoretically, two changes can happen at exactly the same time
     			if(JSON.stringify(oRecord) === JSON.stringify(oChangeRecord)){
     				//skip this record
+    				bAlreadyExists = true;
     				break;
     			}
     		}
-			this.changeRecords.push(oChangeRecord);
     	}
-    	*/
-		this.changeRecords.push(oChangeRecord);
 
-	    //fire an event to indicate that this property has updated
-		this.fireEvent("propertyUpdated", {
-			reason:sap.ui.model.ChangeReason.Binding,
-			path:"changeRecords", 
-			value:this.changeRecords
-		});
+		if(!bAlreadyExists){
+			this.changeRecords.push(oChangeRecord);
+			
+		    //fire an event to indicate that this property has updated
+			this.fireEvent("propertyUpdated", {
+				reason:sap.ui.model.ChangeReason.Binding,
+				path:"changeRecords", 
+				value:this.changeRecords
+			});
+		}
+
 		return;
     }; //changerecords must always be sorted by timestamp (ascending)
 
