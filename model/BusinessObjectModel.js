@@ -558,14 +558,14 @@ sap.ui.define([
 			var oDeferred = $.Deferred( function(oDeferred){
         	//var oPromise = new Promise(function(resolve, reject) {
         		if(!(aChanges instanceof Array)){
-        			resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sModelName })
+        			oDeferred.resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sModelName })
         			return;
         		}
         		
 				//prepare a newDataDownloaded function
 				var fnNewDataUploaded = function(oData){
 					if (aChanges.length > 0){
-						resolve({
+						oDeferred.notify({
 							"success":true, 
 							"data":{response:oData, count:1, final:false}, 
 							"message": "1 changedoc has been uploaded for model " + sModelName 
@@ -588,7 +588,7 @@ sap.ui.define([
 	
 				//prepare a downloadFailed function
 				var fnUploadFailed = function(oErr){
-					reject({"success":false, "data":oErr, "message":"Upload changes failed for: " + sUrl });
+					oDeferred.reject({"success":false, "data":oErr, "message":"Upload changes failed for: " + sUrl });
 				}.bind(this) ;
 				
 				var fnUploadChunk = function(){
