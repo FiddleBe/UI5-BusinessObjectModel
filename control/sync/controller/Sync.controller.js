@@ -36,12 +36,12 @@ sap.ui.define([
     	oModel.uploadChanges(null, sName)
     	.progress(function(oResp){
      		oSync.uploaded += oResp.data.count;
-     		oSync.lastUpload = oResp.timestamp;
+     		oSync.lastUpload = oResp.data.timestamp;
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	})
     	.done(function(oResp){
     		oSync.uploaded += oResp.data.count;
-     		oSync.lastUpload = oResp.timestamp;
+     		oSync.lastUpload = oResp.data.timestamp;
     		
     		if(oResp.data.final === true){
     			oSync.uploading = false;
@@ -65,12 +65,12 @@ sap.ui.define([
     	
     	oModel.downloadChanges(null, sName)
     	.progress(function(oResp){
-     		oSync.lastDownload = oResp.timestamp;
+     		oSync.lastDownload = oResp.data.timestamp;
     		oSync.downloaded += oResp.data.count ;
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	})
     	.done(function(oResp){
-     		oSync.lastDownload = oResp.timestamp;
+     		oSync.lastDownload = oResp.data.timestamp;
     		oSync.downloaded += oResp.data.count ;
     		
     		if(oResp.data.final === true){
