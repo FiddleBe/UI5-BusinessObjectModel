@@ -13,10 +13,6 @@ sap.ui.define([
 			}
 		}	
 	});
-	
-	Monster.prototype.save = function(){
-		BusinessObject.prototype.save.apply(this, arguments);
-	};
 
 	Monster.prototype.setPicture = function(sDataUrl){
 		this.setProperty("picture",sDataUrl);

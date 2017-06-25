@@ -474,8 +474,9 @@ sap.ui.define([
 			}else{
 				sUrl = "" + sUrl + "?";
 			}
-				
-        	var oProm = new Promise(function(resolve, reject){
+
+			var oDeferred = $.Deferred( function(oDeferred){
+			//var oProm = new Promise(function(resolve, reject){ //standard js promises don't support notify/progress
 				//prepare a newDataDownloaded function
 				var fnNewDataDownloaded = function(aChunk){
 					if (aChunk instanceof Array && aChunk.length > 0){
@@ -487,23 +488,25 @@ sap.ui.define([
 						this.saveDataToDb(aEntries); 
 						
 						//progress report
-						resolve({
+						oDeferred.notify({
 							"success":true, 
 							"data":{response:aChunk, count:aChunk.length, final:false}, 
 							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sModelName 
 						});
 						
-				        //store sync properties
-				        var oLast = aChunk[aChunk.length - 1];
-				        if(oLast.changeRecords && oLast.changeRecords.timestamp){
-				        	
-				        }
-				        this._dLastDownload = new Date( oLast.timestamp ); //keep the timestamp of the last downloaded record as new relevant download date
+				        //keep the timestamp of the last downloaded record as new relevant download date
+				        var i = aChunk.length;
+						while(i--){
+							if(aChunk[i].timestamp > this._dLastDownload.getTime() ){
+								this._dLastDownload = new Date(aChunk[i].timestamp );
+							}
+						}
+						//store sync properties
 						this.storeSyncProperties();
 						
 						fnDownloadChunk();
 					}else{
-						resolve({
+						oDeferred.resolve({
 							"success":true, 
 							"data":{response:aChunk, count:0, final:true}, 
 							"message": "all changes downloaded for model " + sModelName 
@@ -513,7 +516,7 @@ sap.ui.define([
 
 				//prepare a downloadFailed function
 				var fnDownloadFailed = function(oErr){
-					reject({"success":false, "data":oErr, "message":"Download new data failed for: " + sUrl });
+					oDeferred.reject({"success":false, "data":oErr, "message":"Download new data failed for: " + sUrl });
 				}.bind(this) ;
 
 				var fnDownloadChunk = function(){
@@ -536,7 +539,7 @@ sap.ui.define([
 				
         	}.bind(this));
 
-			return oProm;
+			return oDeferred;
         };//#TODO split this out in pageable downloads
         
         ObjectModel.prototype.uploadChanges = function( dLastUpload, sModelName ){ 
@@ -551,8 +554,9 @@ sap.ui.define([
 			}else{
 				sUrl = "" + sUrl + "?";
 			}
-
-        	var oPromise = new Promise(function(resolve, reject) {
+			
+			var oDeferred = $.Deferred( function(oDeferred){
+        	//var oPromise = new Promise(function(resolve, reject) {
         		if(!(aChanges instanceof Array)){
         			resolve({"success":true, "data":{count:0, final: true}, "message": "no changes for " + sModelName })
         			return;
@@ -606,7 +610,7 @@ sap.ui.define([
         		fnUploadChunk();
 			}.bind(this) );
 			
-			return oPromise;
+			return oDeferred;
         }; //#TODO: what if a chunk fails? next may only start if previous finishes
 
         ObjectModel.prototype._createSyncProperties = function(oEvent){ 
@@ -633,8 +637,8 @@ sap.ui.define([
 					
 					oGetStore.onsuccess = function(oEvent){
 						if(oEvent.target.result){
-							this._dLastDownload = oEvent.target.result.lastDownload;
-							this._dLastUpload = oEvent.target.result.lastUpload;
+							this._dLastDownload = new Date( oEvent.target.result.lastDownload );
+							this._dLastUpload = new Date(  oEvent.target.result.lastUpload );
 						}else{
 							this._dLastDownload = new Date(0);
 							this._dLastUpload = new Date(0);
@@ -680,8 +684,8 @@ sap.ui.define([
 					
 					var oData = {
 						"id": this.oSettings.store,
-						"lastUpload": this._dLastUpload,
-						"lastDownload":this._dLastDownload
+						"lastUpload": (this._dLastUpload && this._dLastUpload.getTime && this._dLastUpload.getTime() ) || 0,
+						"lastDownload":(this._dLastDownload && this._dLastDownload.getTime && this._dLastDownload.getTime() ) || 0
 					};
 
 					var oPutStore = store.put(oData ); //or do I need to call, getJSON?

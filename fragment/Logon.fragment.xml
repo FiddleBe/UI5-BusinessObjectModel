@@ -6,7 +6,7 @@
 		class="sapUiPopupWithPadding"
 		placement="Right" >
 		<endButton>
-			<Button text="Login" press="onLogon" />
+			<Button text="Login" press="onLogin" />
 		</endButton>
 		<content>
 			<Input id="inpUser" value="" submit="onLogin" placeholder="user name"/>

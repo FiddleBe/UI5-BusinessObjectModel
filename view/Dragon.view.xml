@@ -24,6 +24,8 @@
 			id="dragonDetail"
 			class="sapUiContentPadding"
 			showSideContent="false"
+			sideContentFallDown="BelowM"
+			sideContentVisibility="AlwaysShow"
 			containerQuery="true"
 			breakpointChanged="updateToggleButtonState">
 			<l:mainContent>	
@@ -77,11 +79,13 @@
 				</f:SimpleForm>
 			</l:mainContent>
 			<l:sideContent>
-				<List	width="24rem"
+				<List	width="100%"
 						showSeparators="Inner"
 						items="{monsters>changeRecords}" 
-						showNoData="false">
+						showNoData="false"
+						class="sapContrast sapContrastPlus">
 					<NotificationListItem
+						priority="None"
 						width="24rem"
 						title="Change"
 						description="{path:'monsters>',formatter:'.getObjectAsJSON'}"
@@ -93,7 +97,6 @@
 									}
 								}"
 						unread="false"
-						priority="Low"
 						press="onChangePress" />
 				</List>
 			</l:sideContent>

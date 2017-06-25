@@ -30,6 +30,17 @@
 					<f:content>	
 						<HBox	alignItems="Center" 
 								alignContent="Stretch">
+							<Button	icon="sap-icon://upload-to-cloud"
+									size="2rem"
+									class="sapUiNoMargin"
+									press="onUploadPress"
+									enabled="{= !${sync>uploading} }"/>
+							<ProgressIndicator	class="sapUiSmallMarginEnd"
+												percentValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgress'}"
+												displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgressDisplay'}"
+												showValue="true"
+												state="None" 
+												width="8rem"/>
 							<Text	class="sapUiSmallMargin" 
 									width="5rem"
 									text="{
@@ -37,20 +48,20 @@
 										type:'sap.ui.model.type.Date', 
 										formatOptions: { pattern: 'dd/MMM/yyyy' }
 									}" />
-							<ProgressIndicator	class="sapUiSmallMarginEnd"
-												percentValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgress'}"
-												displayValue="{parts:['sync>uploaded', 'sync>toUpload'], formatter:'.getProgressDisplay'}"
-												showValue="true"
-												state="None" 
-												width="10rem"/>
-							<Button	icon="sap-icon://upload-to-cloud"
-									size="2rem"
-									class="sapUiNoMargin"
-									press="onUploadPress"
-									enabled="{= !${sync>uploading} }"/>
 						</HBox>
 						
 						<HBox alignItems="Center" alignContent="Stretch">
+							<Button	icon="sap-icon://download-from-cloud"
+									size="2rem"
+									class="sapUiNoMargin"
+									press="onDownloadPress"
+									enabled="{= !${sync>downloading} }"/>
+							<ProgressIndicator	class="sapUiSmallMarginEnd"
+												percentValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgress'}"
+												displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgressDisplay'}"
+												showValue="true"
+												state="None" 
+												width="8rem" />
 							<Text	class="sapUiSmallMargin" 
 									width="5rem"
 									text="{
@@ -58,17 +69,6 @@
 										type:'sap.ui.model.type.Date', 
 										formatOptions: { pattern: 'dd/MMM/yyyy' }
 									}" />
-							<ProgressIndicator	class="sapUiSmallMarginEnd"
-												percentValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgress'}"
-												displayValue="{parts:['sync>downloaded', 'sync>toDownload'], formatter:'.getProgressDisplay'}"
-												showValue="true"
-												state="None" 
-												width="10rem" />
-							<Button	icon="sap-icon://download-from-cloud"
-									size="2rem"
-									class="sapUiNoMargin"
-									press="onDownloadPress"
-									enabled="{= !${sync>downloading} }"/>
 						</HBox>
 					</f:content>
 				</f:SimpleForm>

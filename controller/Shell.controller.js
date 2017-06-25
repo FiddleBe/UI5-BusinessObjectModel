@@ -39,8 +39,8 @@ sap.ui.define([
 	};
 	
 	ShellCtrl.prototype.onLogin = function(oEvent){
-		var sUser = this.getView().byId("inpUser");
-		var sPass = this.getView().byId("inpPass");
+		var sUser = sap.ui.getCore().byId("inpUser").getValue();
+		var sPass = sap.ui.getCore().byId("inpPass").getValue();
 		
 		var oXhr =$.get({
 			url: "/service/db.php?entity=monsters&logon",

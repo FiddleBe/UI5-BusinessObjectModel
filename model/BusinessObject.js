@@ -244,7 +244,7 @@ function (BaseObject) {
     BusObj.prototype._setProperty = function (oObject, sKey, vData, sPath, bSkipAsChange){
     	if(sKey && sKey !== ""){
         	oObject[sKey] = vData;
-        	
+
             if(this.getPreviousState(sPath) !== vData ){
 	            if(!bSkipAsChange){
 	            	//update the current change record with the changes (or start a new changerecord if none is available)

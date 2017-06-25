@@ -34,7 +34,11 @@ sap.ui.define([
     	oSync.uploading = true;
     	
     	oModel.uploadChanges(null, sName)
-    	.then(function(oResp){
+    	.progress(function(oResp){
+     		oSync.uploaded += oResp.data.count;
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    	})
+    	.done(function(oResp){
     		oSync.uploaded += oResp.data.count;
     		
     		if(oResp.data.final === true){
@@ -42,7 +46,7 @@ sap.ui.define([
     		}
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this))
-    	.catch(function(oResp){
+    	.fail(function(oResp){
     		oSync.uploading = false;
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this));
@@ -58,7 +62,11 @@ sap.ui.define([
     	oSync.downloading = true;
     	
     	oModel.downloadChanges(null, sName)
-    	.then(function(oResp){
+    	.progress(function(oResp){
+    		oSync.downloaded += oResp.data.count ;
+    		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
+    	})
+    	.done(function(oResp){
     		oSync.downloaded += oResp.data.count ;
     		
     		if(oResp.data.final === true){
@@ -66,7 +74,7 @@ sap.ui.define([
     		}
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this))
-    	.catch(function(oResp){
+    	.fail(function(oResp){
     		oSync.downloading = false;
     		oSyncModel.setProperty(oCtx.getPath(), oSync); //update modelbindings
     	}.bind(this));

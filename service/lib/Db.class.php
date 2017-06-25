@@ -79,7 +79,7 @@ class Db {
 				break;
 			}
 
-			$json = '{"count":"'. $row[0] . '"}';
+			$json = '{"since":"'.$timestamp.'","count":"'. $row[0] . '"}';
 		} while($row);
 		
 		$result->close();		
@@ -112,13 +112,14 @@ class Db {
 				$json = $json . ','; 
 			}
 			$date = strtotime( $row[2] );
-			$timestamp = date(DATE_W3C, $date );
+			
+			//$timestamp = new DateTime(DATE_W3C, $date );
 
 			$json = $json .
 					'{"id":"'. base64_decode( $row[0]) . 
 					'","entity":"'.base64_decode( $row[1]).
-					'","timestamp":"' . $timestamp . //this is btw the server timestamp
-					'","changeIndicator":"' . base64_decode( $row[3]).
+					'","timestamp":' .  ($date * 1000) . //this is btw the server timestamp
+					',"changeIndicator":"' . base64_decode( $row[3]).
 					'","changeRecords":['. base64_decode(  $row[4]).
 					']}';
 		} while($row);
@@ -136,6 +137,7 @@ class Db {
 
 		// die if no connection
 		if ($mysqli->connect_error) {
+			header('HTTP/1.1 401 not authorized');
 			die('Connect Error (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
 		}
 		
