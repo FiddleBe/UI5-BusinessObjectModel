@@ -482,6 +482,14 @@ sap.ui.define([
 					if (aChunk instanceof Array && aChunk.length > 0){
 						this.setData(aChunk, true); //merge
 						
+				        //keep the timestamp of the last downloaded record as new relevant download date
+				        var i = aChunk.length;
+						while(i--){
+							if(aChunk[i].timestamp > this._dLastDownload.getTime() ){
+								this._dLastDownload = new Date(aChunk[i].timestamp );
+							}
+						}
+						
 				        //store all your data in the database 
 				        //#TODO optimize this by only storing the changed objects: from the retrieved oData, loop and fetch every object by id.
 						var aEntries = this.getProperty("/entries");
@@ -490,17 +498,10 @@ sap.ui.define([
 						//progress report
 						oDeferred.notify({
 							"success":true, 
-							"data":{response:aChunk, count:aChunk.length, final:false}, 
+							"data":{response:aChunk, count:aChunk.length, final:false, timestamp:this._dLastDownload}, 
 							"message": "" + aChunk.length + " changedocs have been downloaded for model " + sModelName 
 						});
 						
-				        //keep the timestamp of the last downloaded record as new relevant download date
-				        var i = aChunk.length;
-						while(i--){
-							if(aChunk[i].timestamp > this._dLastDownload.getTime() ){
-								this._dLastDownload = new Date(aChunk[i].timestamp );
-							}
-						}
 						//store sync properties
 						this.storeSyncProperties();
 						
@@ -508,7 +509,7 @@ sap.ui.define([
 					}else{
 						oDeferred.resolve({
 							"success":true, 
-							"data":{response:aChunk, count:0, final:true}, 
+							"data":{response:aChunk, count:0, final:true, timestamp:this._dLastDownload}, 
 							"message": "all changes downloaded for model " + sModelName 
 						});
 					}
@@ -567,15 +568,15 @@ sap.ui.define([
 					if (aChanges.length > 0){
 						oDeferred.notify({
 							"success":true, 
-							"data":{response:oData, count:1, final:false}, 
+							"data":{response:oData, count:1, final:false, timestamp:new Date( oData.changeRecords.timestamp )}, 
 							"message": "1 changedoc has been uploaded for model " + sModelName 
 						});
 						
 						fnUploadChunk()
 					}else{
-						resolve({
+						oDeferred.resolve({
 							"success":true, 
-							"data":{response:oData, count:1, final:true}, 
+							"data":{response:oData, count:1, final:true, timestamp:new Date( oData.changeRecords.timestamp )}, 
 							"message": "1 final changedoc has been uploaded for model " + sModelName 
 						});
 					}
