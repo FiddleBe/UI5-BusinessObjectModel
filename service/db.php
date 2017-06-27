@@ -15,7 +15,7 @@ $input = json_decode($input,true);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $user="monster_doctor"; //defaulted to generic user with limited rights
-$pass="ILoveSAP;"; //defaulted to generic user with limited rights
+$pass="ILoveSAP"; //defaulted to generic user with limited rights
 
 $id = 0;
 $timestamp = $_GET["since"];
@@ -25,8 +25,10 @@ $changeRecord="{}";
 
 //authentication and session management
 if ( isset($_SERVER['PHP_AUTH_USER'] ) ){
-	$_SESSION["USER"] = $_SERVER['PHP_AUTH_USER'] ;
-	$_SESSION["PASS"] = $_SERVER['PHP_AUTH_PW'] ;
+	if($_SERVER['PHP_AUTH_USER'] != "" ){
+		$_SESSION["USER"] = $_SERVER['PHP_AUTH_USER'] ;
+		$_SESSION["PASS"] = $_SERVER['PHP_AUTH_PW'] ;		
+	}
 }
 
 //username?
