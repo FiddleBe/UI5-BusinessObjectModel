@@ -14,8 +14,8 @@ $input = file_get_contents('php://input');
 $input = json_decode($input,true);
 
 $method = $_SERVER['REQUEST_METHOD'];
-$user="monster_doctor"; //defaulted to generic user with limited rights
-$pass="ILoveSAP"; //defaulted to generic user with limited rights
+$user="<db_userid>"; //defaulted to generic user with limited rights
+$pass="<db_pass>"; //defaulted to generic user with limited rights
 
 $id = 0;
 $timestamp = $_GET["since"];
