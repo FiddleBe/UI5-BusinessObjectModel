@@ -18,3 +18,9 @@ The server side is just a simple generic PHP service handler, which allows you t
 
 You can see the showcase running on https://businesobjectmodel.fiddle.be
 try not to screw it up. Please.
+
+Fair use policy:
+You are allowed to use the BOM (BusinessObjectModel) on your projects, but only non-commercial. In other words, you are not allowed to charge your customer money for it.
+When you use the BOM on a project, kindly send me an email with the customer story and the use case, and indicate whether I may share the use case anonymous, or not.
+
+thank you.
