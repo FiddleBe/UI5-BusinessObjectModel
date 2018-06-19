@@ -17,7 +17,7 @@ In the control folder, you can also find a very convenient sync control, which y
 The server side is just a simple generic PHP service handler, which allows you to store anything in a table with blob-content.
 
 You can see the showcase running on https://businesobjectmodel.fiddle.be
-try not to screw it up. Please.
+try not to screw it up. Please. (showcase is temporarily not functioning due to technical reasons)
 
 Fair use policy:
 You are allowed to use the BOM (BusinessObjectModel) on your projects, but only non-commercial. In other words, you are not allowed to charge your customer money for it.
